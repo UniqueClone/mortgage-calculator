@@ -9,24 +9,12 @@ const formatter = new Intl.NumberFormat("en-IE", {
 
 function MortgageCalculator(): JSX.Element {
     const [houseValue, setHouseValue] = useState<number>(452458.0); // Declare houseValue variable
-    const [loanAmount, setLoanAmount] = useState<number>(houseValue * 0.9); // Declare loanAmount variable
     const [interestRate, setInterestRate] = useState<number>(3.8); // Declare interestRate variable
     const [loanTerm, setLoanTerm] = useState<number>(35); // Declare loanTerm variable
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         // Perform calculations or submit form data here
-    };
-
-    const setHouseAndLoanAmount = (value: number) => {
-        setHouseValue(value);
-        setLoanAmount(parseFloat((value * 0.9).toFixed(2)));
-    };
-
-    const setLoanAndHouseValue = (value: number) => {
-        setLoanAmount(value);
-        // setHouseValue(parseFloat((value / 0.9).toFixed(2)));
-        setHouseValue(value / 0.9);
     };
 
     return (
@@ -39,9 +27,8 @@ function MortgageCalculator(): JSX.Element {
                         type="number"
                         value={houseValue}
                         onChange={(e) =>
-                            setHouseAndLoanAmount(parseInt(e.target.value))
+                            setHouseValue(parseFloat(e.target.value))
                         }
-                        // readOnly
                     />
                 </label>
                 <br />
@@ -49,9 +36,9 @@ function MortgageCalculator(): JSX.Element {
                     Loan Amount (€):
                     <input
                         type="number"
-                        value={loanAmount}
+                        value={(houseValue * 0.9).toFixed(2)}
                         onChange={(e) =>
-                            setLoanAndHouseValue(parseInt(e.target.value))
+                            setHouseValue(parseFloat(e.target.value) / 0.9)
                         }
                     />
                 </label>
@@ -102,7 +89,7 @@ function MortgageCalculator(): JSX.Element {
                 }}
             >
                 {formatter.format(
-                    monthlyPayment(loanAmount, interestRate, loanTerm)
+                    monthlyPayment(houseValue * 0.9, interestRate, loanTerm)
                 )}
             </p>
 
@@ -113,7 +100,7 @@ function MortgageCalculator(): JSX.Element {
                     fontSize: "24px",
                 }}
             >
-                {formatter.format((loanAmount / 9) * 10)}
+                {formatter.format(houseValue)}
             </p>
         </div>
     );
