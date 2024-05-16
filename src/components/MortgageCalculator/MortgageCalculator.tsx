@@ -11,10 +11,19 @@ function MortgageCalculator(): JSX.Element {
     const [houseValue, setHouseValue] = useState<number>(452458.0); // Declare houseValue variable
     const [interestRate, setInterestRate] = useState<number>(3.8); // Declare interestRate variable
     const [loanTerm, setLoanTerm] = useState<number>(35); // Declare loanTerm variable
+    const [fixedTerm, setFixedTerm] = useState<number>(4); // Declare fixedTerm variable
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         // Perform calculations or submit form data here
+    };
+
+    const onHouseValueChange = (value: number) => {
+        if (value < 0) {
+            setHouseValue(0);
+        } else {
+            setHouseValue(value);
+        }
     };
 
     return (
@@ -27,7 +36,7 @@ function MortgageCalculator(): JSX.Element {
                         type="number"
                         value={houseValue}
                         onChange={(e) =>
-                            setHouseValue(parseFloat(e.target.value))
+                            onHouseValueChange(parseFloat(e.target.value))
                         }
                     />
                 </label>
@@ -36,9 +45,11 @@ function MortgageCalculator(): JSX.Element {
                     Loan Amount (€):
                     <input
                         type="number"
-                        value={(houseValue * 0.9).toFixed(2)}
+                        value={
+                            houseValue * 0.9 //.toFixed(2)
+                        }
                         onChange={(e) =>
-                            setHouseValue(parseFloat(e.target.value) / 0.9)
+                            onHouseValueChange(parseFloat(e.target.value) / 0.9)
                         }
                     />
                 </label>
@@ -73,14 +84,15 @@ function MortgageCalculator(): JSX.Element {
                     />
                 </label>
                 <br />
-                {/* <button type="submit">Calculate</button> */}
+                <label>
+                    Fixed Term (in years):
+                    <input
+                        type="number"
+                        value={fixedTerm}
+                        onChange={(e) => setFixedTerm(parseInt(e.target.value))}
+                    />
+                </label>
             </form>
-
-            {/* <h2>Results</h2>
-            <p>Loan Amount: {formatter.format(loanAmount)}</p>
-            <p>Interest Rate: {interestRate.toFixed(2)}%</p>
-            <p>Loan Term: {loanTerm}</p> */}
-
             <h2>Monthly Payment</h2>
             <p
                 style={{
@@ -89,7 +101,23 @@ function MortgageCalculator(): JSX.Element {
                 }}
             >
                 {formatter.format(
-                    monthlyPayment(houseValue * 0.9, interestRate, loanTerm)
+                    getMonthlyPayment(houseValue * 0.9, interestRate, loanTerm)
+                )}
+            </p>
+
+            <h2>Monthly Payment after Fixed Term</h2>
+            <p
+                style={{
+                    color: "green",
+                    fontSize: "24px",
+                }}
+            >
+                {formatter.format(
+                    getMonthlyPayment(
+                        houseValue * 0.9,
+                        interestRate,
+                        loanTerm - fixedTerm
+                    )
                 )}
             </p>
 
@@ -100,24 +128,39 @@ function MortgageCalculator(): JSX.Element {
                     fontSize: "24px",
                 }}
             >
-                {formatter.format(houseValue)}
+                {formatter.format(getCleanHouseValue(houseValue))}
+            </p>
+
+            <h2>Total Payment</h2>
+            <p
+                style={{
+                    color: "green",
+                    fontSize: "24px",
+                }}
+            >
+                {formatter.format(
+                    getTotalPayment(
+                        houseValue * 0.9,
+                        interestRate,
+                        loanTerm,
+                        fixedTerm,
+                        interestRate
+                    )
+                )}
             </p>
         </div>
     );
 }
 
-/**
- * Calculate the monthly payment for a mortgage.
- * @param loanAmount The total amount of the loan.
- * @param interestRate The annual interest rate for the loan.
- * @param loanTerm The term of the loan in years.
- * @returns The monthly payment amount.
- */
-function monthlyPayment(
+const getMonthlyPayment = (
     loanAmount: number,
     interestRate: number,
     loanTerm: number
-): number {
+) => {
+    if (isNaN(loanAmount) || isNaN(interestRate) || isNaN(loanTerm)) {
+        return 0;
+    }
+
     const monthlyInterestRate = interestRate / 100 / 12;
     const numberOfPayments = loanTerm * 12;
     const numerator =
@@ -126,6 +169,53 @@ function monthlyPayment(
         (1 + monthlyInterestRate) ** numberOfPayments;
     const denominator = (1 + monthlyInterestRate) ** numberOfPayments - 1;
     return parseFloat((numerator / denominator).toFixed(2));
-}
+};
+
+const getTotalPayment = (
+    loanAmount: number,
+    interestRate: number,
+    loanTerm: number,
+    fixedTerm: number,
+    interestRateAfterFixedTerm: number
+) => {
+    if (
+        isNaN(loanAmount) ||
+        isNaN(interestRate) ||
+        isNaN(loanTerm) ||
+        isNaN(fixedTerm) ||
+        isNaN(interestRateAfterFixedTerm)
+    ) {
+        return 0;
+    }
+
+    const monthlyPayment = getMonthlyPayment(
+        loanAmount,
+        interestRate,
+        loanTerm
+    );
+    const fixedTermPayments = fixedTerm * 12;
+    const fixedTermPayment = monthlyPayment * fixedTermPayments;
+    const remainingLoanAmount = loanAmount - fixedTermPayment;
+    const remainingMonthlyPayment = getMonthlyPayment(
+        remainingLoanAmount,
+        interestRateAfterFixedTerm,
+        loanTerm - fixedTerm
+    );
+    const remainingTermPayments = (loanTerm - fixedTerm) * 12;
+    return parseFloat(
+        (
+            fixedTermPayment +
+            remainingMonthlyPayment * remainingTermPayments
+        ).toFixed(2)
+    );
+};
+
+const getCleanHouseValue = (houseValue: number) => {
+    if (isNaN(houseValue)) {
+        return 0;
+    }
+
+    return houseValue;
+};
 
 export default MortgageCalculator;
