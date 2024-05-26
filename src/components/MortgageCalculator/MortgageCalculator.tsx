@@ -8,10 +8,12 @@ const formatter = new Intl.NumberFormat("en-IE", {
 });
 
 function MortgageCalculator(): JSX.Element {
-    const [houseValue, setHouseValue] = useState<number>(452458.0); // Declare houseValue variable
+    const [houseValue, setHouseValue] = useState<number>(0.0); // Declare houseValue variable
     const [interestRate, setInterestRate] = useState<number>(3.8); // Declare interestRate variable
     const [loanTerm, setLoanTerm] = useState<number>(35); // Declare loanTerm variable
     const [fixedTerm, setFixedTerm] = useState<number>(4); // Declare fixedTerm variable
+    const [interestRateAfterFixedTerm, setInterestRateAfterFixedTerm] =
+        useState<number>(3.95); // Declare interestRateAfterFixedTerm variable
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -19,7 +21,7 @@ function MortgageCalculator(): JSX.Element {
     };
 
     const onHouseValueChange = (value: number) => {
-        if (value < 0) {
+        if (isNaN(value) || value < 0) {
             setHouseValue(0);
         } else {
             setHouseValue(value);
@@ -29,125 +31,176 @@ function MortgageCalculator(): JSX.Element {
     return (
         <div>
             <h1>Mortgage Calculator</h1>
-            <form onSubmit={handleSubmit}>
-                <label>
-                    House Value (€):
-                    <input
-                        type="number"
-                        value={houseValue}
-                        onChange={(e) =>
-                            onHouseValueChange(parseFloat(e.target.value))
-                        }
-                    />
-                </label>
-                <br />
-                <label>
-                    Loan Amount (€):
-                    <input
-                        type="number"
-                        value={
-                            houseValue * 0.9 //.toFixed(2)
-                        }
-                        onChange={(e) =>
-                            onHouseValueChange(parseFloat(e.target.value) / 0.9)
-                        }
-                    />
-                </label>
-                <br />
-                <label>
-                    Interest Rate (%):
-                    <input
-                        type="number"
-                        value={interestRate}
-                        onChange={(e) =>
-                            setInterestRate(parseFloat(e.target.value))
-                        }
-                        onWheel={(e) =>
-                            setInterestRate(
-                                Number(
-                                    (
-                                        interestRate +
-                                        (e.deltaY > 0 ? -0.1 : 0.1)
-                                    ).toFixed(2)
+            <form className="columns" onSubmit={handleSubmit}>
+                <div className="column column-1">
+                    <label>
+                        House Value (€):
+                        <br />
+                        <input
+                            type="number"
+                            value={houseValue}
+                            onChange={(e) =>
+                                onHouseValueChange(parseFloat(e.target.value))
+                            }
+                        />
+                    </label>
+                    <br />
+                    <label>
+                        Loan Amount (€):
+                        <br />
+                        <input
+                            type="number"
+                            value={
+                                houseValue * 0.9 //.toFixed(2)
+                            }
+                            onChange={(e) =>
+                                onHouseValueChange(
+                                    parseFloat(e.target.value) / 0.9
                                 )
-                            )
-                        }
-                    />
-                </label>
-                <br />
-                <label>
-                    Loan Term (in years):
-                    <input
-                        type="number"
-                        value={loanTerm}
-                        onChange={(e) => setLoanTerm(parseInt(e.target.value))}
-                    />
-                </label>
-                <br />
-                <label>
-                    Fixed Term (in years):
-                    <input
-                        type="number"
-                        value={fixedTerm}
-                        onChange={(e) => setFixedTerm(parseInt(e.target.value))}
-                    />
-                </label>
+                            }
+                        />
+                    </label>
+                    <br />
+                    <label>
+                        Loan Term (in years):
+                        <br />
+                        <input
+                            type="number"
+                            value={loanTerm}
+                            onChange={(e) =>
+                                setLoanTerm(parseInt(e.target.value))
+                            }
+                        />
+                    </label>
+                    <br />
+                </div>
+
+                <div className="column column-2">
+                    <label>
+                        Interest Rate (%):
+                        <br />
+                        <input
+                            type="number"
+                            value={interestRate}
+                            onChange={(e) =>
+                                setInterestRate(parseFloat(e.target.value))
+                            }
+                            onWheel={(e) =>
+                                setInterestRate(
+                                    Number(
+                                        (
+                                            interestRate +
+                                            (e.deltaY > 0 ? -0.1 : 0.1)
+                                        ).toFixed(2)
+                                    )
+                                )
+                            }
+                        />
+                    </label>
+                    <br />
+                    <label>
+                        Fixed Term (in years):
+                        <br />
+                        <input
+                            type="number"
+                            value={fixedTerm}
+                            onChange={(e) =>
+                                setFixedTerm(parseInt(e.target.value))
+                            }
+                        />
+                    </label>
+                    <br />
+                    <label>
+                        Interest Rate after Fixed Term (%):
+                        <br />
+                        <input
+                            type="number"
+                            value={interestRateAfterFixedTerm}
+                            onChange={(e) =>
+                                setInterestRateAfterFixedTerm(
+                                    parseFloat(e.target.value)
+                                )
+                            }
+                            // onWheel={(e) =>
+                            //     setInterestRateAfterFixedTerm(
+                            //         Number(
+                            //             (
+                            //                 interestRateAfterFixedTerm +
+                            //                 (e.deltaY > 0 ? -0.1 : 0.1)
+                            //             ).toFixed(2)
+                            //         )
+                            //     )
+                            // }
+                        />
+                    </label>
+                </div>
             </form>
-            <h2>Monthly Payment</h2>
-            <p
-                style={{
-                    color: "green",
-                    fontSize: "24px",
-                }}
-            >
-                {formatter.format(
-                    getMonthlyPayment(houseValue * 0.9, interestRate, loanTerm)
-                )}
-            </p>
 
-            <h2>Monthly Payment after Fixed Term</h2>
-            <p
-                style={{
-                    color: "green",
-                    fontSize: "24px",
-                }}
-            >
-                {formatter.format(
-                    getMonthlyPayment(
-                        houseValue * 0.9,
-                        interestRate,
-                        loanTerm - fixedTerm
-                    )
-                )}
-            </p>
+            <div className="columns">
+                <div className="column column-1">
+                    <h2>Monthly Payment</h2>
+                    <p
+                        style={{
+                            color: "green",
+                            fontSize: "24px",
+                        }}
+                    >
+                        {formatter.format(
+                            getMonthlyPayment(
+                                houseValue * 0.9,
+                                interestRate,
+                                loanTerm
+                            )
+                        )}
+                    </p>
 
-            <h2>House Value</h2>
-            <p
-                style={{
-                    color: "green",
-                    fontSize: "24px",
-                }}
-            >
-                {formatter.format(getCleanHouseValue(houseValue))}
-            </p>
+                    <h2>Monthly Payment after Fixed Term</h2>
+                    <p
+                        style={{
+                            color: "green",
+                            fontSize: "24px",
+                        }}
+                    >
+                        {formatter.format(
+                            getMonthlyPayment(
+                                houseValue * 0.9,
+                                interestRateAfterFixedTerm,
+                                loanTerm - fixedTerm
+                            )
+                        )}
+                    </p>
+                </div>
 
-            <h2>Total Payment</h2>
-            <p
-                style={{
-                    color: "green",
-                    fontSize: "24px",
-                }}
-            >
-                {formatter.format(
-                    getTotalPayment(
-                        houseValue * 0.9,
-                        interestRate,
-                        loanTerm,
-                        fixedTerm,
-                        interestRate
-                    )
-                )}
-            </p>
+                <div className="column column-2">
+                    <h2>House Value</h2>
+                    <p
+                        style={{
+                            color: "green",
+                            fontSize: "24px",
+                        }}
+                    >
+                        {formatter.format(getCleanHouseValue(houseValue))}
+                    </p>
+
+                    <h2>Total Cost</h2>
+                    <p
+                        style={{
+                            color: "green",
+                            fontSize: "24px",
+                        }}
+                    >
+                        {formatter.format(
+                            getTotalPayment(
+                                houseValue * 0.9,
+                                interestRate,
+                                loanTerm,
+                                fixedTerm,
+                                interestRateAfterFixedTerm
+                            )
+                        )}
+                    </p>
+                </div>
+            </div>
         </div>
     );
 }
