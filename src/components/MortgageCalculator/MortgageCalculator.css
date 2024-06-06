@@ -75,5 +75,7 @@ h2 {
 
 h3 {
     font-size: large;
-    color: lightgreen
+    p {
+        color: lightgreen
+    }
 }

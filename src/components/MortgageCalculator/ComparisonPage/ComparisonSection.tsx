@@ -59,27 +59,33 @@ const OptionSection: React.FC<{
                     onChange={(e) => setHousePrice(parseInt(e.target.value))}
                 />
             </label>
-            <h3>House Price: {formatter.format(housePrice)}</h3>
+            <h3>
+                House Price: <p>{formatter.format(housePrice)}</p>
+            </h3>
             <h3>
                 Monthly Payment:{" "}
-                {formatter.format(
-                    getMonthlyPayment(
-                        housePrice * 0.9,
-                        option.interestRate,
-                        option.mortgageTerm
-                    )
-                )}
+                <p>
+                    {formatter.format(
+                        getMonthlyPayment(
+                            housePrice * 0.9,
+                            option.interestRate,
+                            option.mortgageTerm
+                        )
+                    )}
+                </p>
             </h3>
             <h3>
                 Savings Required:{" "}
-                {formatter.format(
-                    housePrice * option.depositPercentage +
-                        option.fees.valuationFee +
-                        option.fees.surveyFee +
-                        option.fees.legalFee +
-                        housePrice * 0.01 + // stamp duty
-                        option.fees.searchFee
-                )}
+                <p>
+                    {formatter.format(
+                        housePrice * option.depositPercentage +
+                            option.fees.valuationFee +
+                            option.fees.surveyFee +
+                            option.fees.legalFee +
+                            housePrice * 0.01 + // stamp duty
+                            option.fees.searchFee
+                    )}
+                </p>
             </h3>
         </div>
     );
