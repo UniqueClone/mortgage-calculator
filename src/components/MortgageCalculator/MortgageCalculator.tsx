@@ -1,12 +1,7 @@
 import { useState } from "react";
 import "./MortgageCalculator.css";
-import { savingsRequired } from "./MortgageCalculator.mapper";
-
-const formatter = new Intl.NumberFormat("en-IE", {
-    style: "currency",
-    currency: "EUR",
-    minimumFractionDigits: 0,
-});
+import { formatter, savingsRequired } from "./MortgageCalculator.mapper";
+import ComparisonPage from "./ComparisonPage/ComparisonPage";
 
 function MortgageCalculator(): JSX.Element {
     const [houseValue, setHouseValue] = useState<number>(0.0); // Declare houseValue variable
@@ -137,9 +132,7 @@ function MortgageCalculator(): JSX.Element {
                 </div>
             </form>
 
-            <h2 style={{ fontSize: "1.5rem" }}>
-                Savings Required
-            </h2>
+            <h2 style={{ fontSize: "1.5rem" }}>Savings Required</h2>
             <p
                 style={{
                     color: "green",
@@ -147,8 +140,7 @@ function MortgageCalculator(): JSX.Element {
                 }}
             >
                 {formatter.format(
-                    savingsRequired({
-                        deposit: houseValue * 0.1,
+                    savingsRequired(houseValue * 0.1, {
                         valuationFee: 185,
                         surveyFee: 500,
                         legalFee: 3300,
@@ -223,11 +215,52 @@ function MortgageCalculator(): JSX.Element {
                     </p>
                 </div>
             </div>
+            <ComparisonPage
+            // option1={{
+            //     housePrice: 440000,
+            //     depositPercentage: 0.1,
+            //     mortgageTerm: 35,
+            //     interestRate: 3.8,
+            //     fees: {
+            //         valuationFee: 185,
+            //         surveyFee: 500,
+            //         legalFee: 3300,
+            //         stampDuty: 4400,
+            //         searchFee: 250,
+            //     },
+            // }}
+            // option2={{
+            //     housePrice: 450000,
+            //     depositPercentage: 0.1,
+            //     mortgageTerm: 35,
+            //     interestRate: 3.8,
+            //     fees: {
+            //         valuationFee: 185,
+            //         surveyFee: 500,
+            //         legalFee: 3300,
+            //         stampDuty: 4500,
+            //         searchFee: 250,
+            //     },
+            // }}
+            // option3={{
+            //     housePrice: 460000,
+            //     depositPercentage: 0.1,
+            //     mortgageTerm: 35,
+            //     interestRate: 3.8,
+            //     fees: {
+            //         valuationFee: 185,
+            //         surveyFee: 500,
+            //         legalFee: 3300,
+            //         stampDuty: 4600,
+            //         searchFee: 250,
+            //     },
+            // }}
+            />
         </div>
     );
 }
 
-const getMonthlyPayment = (
+export const getMonthlyPayment = (
     loanAmount: number,
     interestRate: number,
     loanTerm: number
