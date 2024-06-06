@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./MortgageCalculator.css";
+import { savingsRequired } from "./MortgageCalculator.mapper";
 
 const formatter = new Intl.NumberFormat("en-IE", {
     style: "currency",
@@ -135,6 +136,27 @@ function MortgageCalculator(): JSX.Element {
                     </label>
                 </div>
             </form>
+
+            <h2 style={{ fontSize: "1.5rem" }}>
+                Savings Required
+            </h2>
+            <p
+                style={{
+                    color: "green",
+                    fontSize: "1.5rem",
+                }}
+            >
+                {formatter.format(
+                    savingsRequired({
+                        deposit: houseValue * 0.1,
+                        valuationFee: 185,
+                        surveyFee: 500,
+                        legalFee: 3300,
+                        stampDuty: houseValue * 0.01,
+                        searchFee: 250,
+                    })
+                )}
+            </p>
 
             <div className="columns">
                 <div className="column column-1">
