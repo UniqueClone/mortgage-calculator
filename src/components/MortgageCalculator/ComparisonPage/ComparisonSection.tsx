@@ -39,9 +39,24 @@ const OptionSection: React.FC<{
 }> = (props: { id: number; option: MortgageProperties }) => {
     const { id, option } = props;
     const [housePrice, setHousePrice] = React.useState(option.housePrice);
+    const [loanAmount, setLoanAmount] = React.useState(housePrice * 0.9);
     const useOneInterestRate = option.interestRate !== undefined;
     const [interestRate, setInterestRate] = React.useState(3.8);
     // const [mortgageTerm, setMortgageTerm] = React.useState(option.mortgageTerm);
+
+    const handleLoanAmountChange = (
+        loanAmount: number,
+        housePrice: number,
+        setLoanAmount: (loanAmount: number) => void
+    ) => {
+        if (loanAmount < 0) {
+            setLoanAmount(0);
+        } else if (loanAmount > housePrice * 0.9) {
+            setLoanAmount(housePrice * 0.9);
+        } else {
+            setLoanAmount(loanAmount);
+        }
+    };
 
     return (
         <div>
@@ -52,6 +67,7 @@ const OptionSection: React.FC<{
             >
                 Option {id}
             </h2>
+
             <label>
                 House Price (€)
                 <input
@@ -60,6 +76,28 @@ const OptionSection: React.FC<{
                     onChange={(e) => setHousePrice(parseInt(e.target.value))}
                 />
             </label>
+
+            <br />
+
+            <label>
+                Loan Amount (%)
+                <input
+                    type="number"
+                    value={loanAmount}
+                    onChange={(e) =>
+                        handleLoanAmountChange(
+                            parseFloat(e.target.value),
+                            housePrice,
+                            setLoanAmount
+                        )
+                    }
+                />
+            </label>
+
+            <button onClick={() => setLoanAmount(housePrice * 0.9)}>
+                Set loan amount to 90%
+            </button>
+
             {!useOneInterestRate && (
                 <>
                     <br />
@@ -83,7 +121,7 @@ const OptionSection: React.FC<{
                 <p>
                     {formatter.format(
                         getMonthlyPayment(
-                            housePrice * 0.9,
+                            loanAmount,
                             option.interestRate ?? interestRate,
                             option.mortgageTerm
                         )
@@ -94,7 +132,8 @@ const OptionSection: React.FC<{
                 Savings Required:{" "}
                 <p>
                     {formatter.format(
-                        housePrice * option.depositPercentage +
+                        housePrice -
+                            loanAmount +
                             option.fees.valuationFee +
                             option.fees.surveyFee +
                             option.fees.legalFee +
