@@ -4,6 +4,6 @@ export interface MortgageProperties {
     housePrice: number;
     depositPercentage: number;
     mortgageTerm: number;
-    interestRate: number;
+    interestRate?: number;
     fees: MortgageFees;
 }

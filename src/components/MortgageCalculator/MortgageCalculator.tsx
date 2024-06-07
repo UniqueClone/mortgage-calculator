@@ -215,47 +215,7 @@ function MortgageCalculator(): JSX.Element {
                     </p>
                 </div>
             </div>
-            <ComparisonPage
-            // option1={{
-            //     housePrice: 440000,
-            //     depositPercentage: 0.1,
-            //     mortgageTerm: 35,
-            //     interestRate: 3.8,
-            //     fees: {
-            //         valuationFee: 185,
-            //         surveyFee: 500,
-            //         legalFee: 3300,
-            //         stampDuty: 4400,
-            //         searchFee: 250,
-            //     },
-            // }}
-            // option2={{
-            //     housePrice: 450000,
-            //     depositPercentage: 0.1,
-            //     mortgageTerm: 35,
-            //     interestRate: 3.8,
-            //     fees: {
-            //         valuationFee: 185,
-            //         surveyFee: 500,
-            //         legalFee: 3300,
-            //         stampDuty: 4500,
-            //         searchFee: 250,
-            //     },
-            // }}
-            // option3={{
-            //     housePrice: 460000,
-            //     depositPercentage: 0.1,
-            //     mortgageTerm: 35,
-            //     interestRate: 3.8,
-            //     fees: {
-            //         valuationFee: 185,
-            //         surveyFee: 500,
-            //         legalFee: 3300,
-            //         stampDuty: 4600,
-            //         searchFee: 250,
-            //     },
-            // }}
-            />
+            <ComparisonPage />
         </div>
     );
 }

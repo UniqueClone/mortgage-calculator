@@ -1,10 +1,10 @@
 import "./App.css";
-import MortgageCalculator from "./components/MortgageCalculator/MortgageCalculator";
+import ComparisonPage from "./components/MortgageCalculator/ComparisonPage/ComparisonPage";
 
 function App() {
     return (
         <>
-            <MortgageCalculator />
+            <ComparisonPage />
         </>
     );
 }

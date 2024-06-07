@@ -39,7 +39,8 @@ const OptionSection: React.FC<{
 }> = (props: { id: number; option: MortgageProperties }) => {
     const { id, option } = props;
     const [housePrice, setHousePrice] = React.useState(option.housePrice);
-    // const [interestRate, setInterestRate] = React.useState(option.interestRate);
+    const useOneInterestRate = option.interestRate !== undefined;
+    const [interestRate, setInterestRate] = React.useState(3.8);
     // const [mortgageTerm, setMortgageTerm] = React.useState(option.mortgageTerm);
 
     return (
@@ -59,6 +60,21 @@ const OptionSection: React.FC<{
                     onChange={(e) => setHousePrice(parseInt(e.target.value))}
                 />
             </label>
+            {!useOneInterestRate && (
+                <>
+                    <br />
+                    <label>
+                        Interest Rate (%)
+                        <input
+                            type="number"
+                            value={interestRate}
+                            onChange={(e) =>
+                                setInterestRate(parseFloat(e.target.value))
+                            }
+                        />
+                    </label>{" "}
+                </>
+            )}
             <h3>
                 House Price: <p>{formatter.format(housePrice)}</p>
             </h3>
@@ -68,7 +84,7 @@ const OptionSection: React.FC<{
                     {formatter.format(
                         getMonthlyPayment(
                             housePrice * 0.9,
-                            option.interestRate,
+                            option.interestRate ?? interestRate,
                             option.mortgageTerm
                         )
                     )}
