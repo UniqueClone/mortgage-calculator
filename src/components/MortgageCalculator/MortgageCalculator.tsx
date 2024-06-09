@@ -1,6 +1,10 @@
 import { useState } from "react";
 import "./MortgageCalculator.css";
-import { formatter, savingsRequired } from "./MortgageCalculator.mapper";
+import {
+    formatter,
+    getMonthlyPayment,
+    savingsRequired,
+} from "./MortgageCalculator.mapper";
 import ComparisonPage from "./ComparisonPage/ComparisonPage";
 
 function MortgageCalculator(): JSX.Element {
@@ -146,6 +150,8 @@ function MortgageCalculator(): JSX.Element {
                         legalFee: 3300,
                         stampDuty: houseValue * 0.01,
                         searchFee: 250,
+                        registerOfDeedsFee: 100,
+                        landRegistryFee: 975,
                     })
                 )}
             </p>
@@ -219,25 +225,6 @@ function MortgageCalculator(): JSX.Element {
         </div>
     );
 }
-
-export const getMonthlyPayment = (
-    loanAmount: number,
-    interestRate: number,
-    loanTerm: number
-) => {
-    if (isNaN(loanAmount) || isNaN(interestRate) || isNaN(loanTerm)) {
-        return 0;
-    }
-
-    const monthlyInterestRate = interestRate / 100 / 12;
-    const numberOfPayments = loanTerm * 12;
-    const numerator =
-        loanAmount *
-        monthlyInterestRate *
-        (1 + monthlyInterestRate) ** numberOfPayments;
-    const denominator = (1 + monthlyInterestRate) ** numberOfPayments - 1;
-    return parseFloat((numerator / denominator).toFixed(2));
-};
 
 const getTotalPayment = (
     loanAmount: number,
