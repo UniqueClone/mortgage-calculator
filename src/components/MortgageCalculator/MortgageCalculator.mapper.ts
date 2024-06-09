@@ -17,6 +17,23 @@ export const formatter = new Intl.NumberFormat("en-IE", {
     currency: "EUR",
     minimumFractionDigits: 2,
 });
+
+export const cleanLoanAmount = (
+    housePrice: number,
+    loanAmount: number,
+    maxLoanAmount: number | undefined
+): number => {
+    if (loanAmount < 0) {
+        return 0;
+    } else if (loanAmount > housePrice * 0.9) {
+        return cleanLoanAmount(housePrice, housePrice * 0.9, maxLoanAmount);
+    } else if (maxLoanAmount && loanAmount > maxLoanAmount) {
+        return maxLoanAmount;
+    } else {
+        return parseFloat(loanAmount.toFixed(2));
+    }
+};
+
 export const getMonthlyPayment = (
     loanAmount: number,
     interestRate: number,

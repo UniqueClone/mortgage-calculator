@@ -1,7 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { MortgageProperties } from "../../MortgageProperties";
-import { getMonthlyPayment } from "../MortgageCalculator";
-import { formatter } from "../MortgageCalculator.mapper";
+import {
+    cleanLoanAmount,
+    formatter,
+    getMonthlyPayment,
+    savingsRequired,
+} from "../MortgageCalculator.mapper";
+import { LoanConfigContext } from "./ComparisonPage";
+
+import "../MortgageCalculator.css";
 
 interface ComparisonSectionProps {
     option1: MortgageProperties;
@@ -18,15 +25,15 @@ export const ComparisonSection: React.FC<ComparisonSectionProps> = (
         <div>
             <div className="columns">
                 <div className="column column-1">
-                    <OptionSection id={1} option={option1} />
+                    <OptionSection id={1} mortgageProps={option1} />
                 </div>
 
                 <div className="column column-2">
-                    <OptionSection id={2} option={option2} />
+                    <OptionSection id={2} mortgageProps={option2} />
                 </div>
 
                 <div className="column column-3">
-                    <OptionSection id={3} option={option3} />
+                    <OptionSection id={3} mortgageProps={option3} />
                 </div>
             </div>
         </div>
@@ -35,28 +42,26 @@ export const ComparisonSection: React.FC<ComparisonSectionProps> = (
 
 const OptionSection: React.FC<{
     id: number;
-    option: MortgageProperties;
-}> = (props: { id: number; option: MortgageProperties }) => {
-    const { id, option } = props;
-    const [housePrice, setHousePrice] = React.useState(option.housePrice);
-    const [loanAmount, setLoanAmount] = React.useState(housePrice * 0.9);
-    const useOneInterestRate = option.interestRate !== undefined;
-    const [interestRate, setInterestRate] = React.useState(3.8);
-    // const [mortgageTerm, setMortgageTerm] = React.useState(option.mortgageTerm);
+    mortgageProps: MortgageProperties;
+}> = (props: { id: number; mortgageProps: MortgageProperties }) => {
+    const config = React.useContext(LoanConfigContext);
 
-    const handleLoanAmountChange = (
-        loanAmount: number,
-        housePrice: number,
-        setLoanAmount: (loanAmount: number) => void
-    ) => {
-        if (loanAmount < 0) {
-            setLoanAmount(0);
-        } else if (loanAmount > housePrice * 0.9) {
-            setLoanAmount(housePrice * 0.9);
-        } else {
-            setLoanAmount(loanAmount);
-        }
-    };
+    const { id, mortgageProps } = props;
+    const [housePrice, setHousePrice] = React.useState(
+        mortgageProps.housePrice
+    );
+    const useOneInterestRate = config.fixedInterestRate !== undefined;
+    const [interestRate, setInterestRate] = React.useState(3.8);
+
+    const maxLoanAmount = config.maxLoanAmount;
+    const [loanAmount, setLoanAmount] = React.useState(
+        cleanLoanAmount(housePrice, housePrice * 0.9, maxLoanAmount)
+    );
+
+    useEffect(() => {
+        setHousePrice(housePrice);
+        setLoanAmount(cleanLoanAmount(housePrice, loanAmount, maxLoanAmount));
+    }, [housePrice, maxLoanAmount]);
 
     return (
         <div>
@@ -73,7 +78,16 @@ const OptionSection: React.FC<{
                 <input
                     type="number"
                     value={housePrice}
-                    onChange={(e) => setHousePrice(parseInt(e.target.value))}
+                    onChange={(e) => {
+                        setHousePrice(parseInt(e.target.value));
+                        setLoanAmount(
+                            cleanLoanAmount(
+                                parseInt(e.target.value),
+                                parseInt(e.target.value) * 0.9,
+                                maxLoanAmount
+                            )
+                        );
+                    }}
                 />
             </label>
 
@@ -85,17 +99,29 @@ const OptionSection: React.FC<{
                     type="number"
                     value={loanAmount}
                     onChange={(e) =>
-                        handleLoanAmountChange(
-                            parseFloat(e.target.value),
-                            housePrice,
-                            setLoanAmount
+                        setLoanAmount(
+                            cleanLoanAmount(
+                                housePrice,
+                                parseFloat(e.target.value),
+                                maxLoanAmount
+                            )
                         )
                     }
                 />
             </label>
 
-            <button onClick={() => setLoanAmount(housePrice * 0.9)}>
-                Set loan amount to 90%
+            <button
+                onClick={() =>
+                    setLoanAmount(
+                        cleanLoanAmount(
+                            housePrice,
+                            housePrice * 0.9,
+                            maxLoanAmount
+                        )
+                    )
+                }
+            >
+                Set loan amount to max
             </button>
 
             {!useOneInterestRate && (
@@ -122,8 +148,8 @@ const OptionSection: React.FC<{
                     {formatter.format(
                         getMonthlyPayment(
                             loanAmount,
-                            option.interestRate ?? interestRate,
-                            option.mortgageTerm
+                            config.fixedInterestRate ?? interestRate,
+                            config.mortgageTerm
                         )
                     )}
                 </p>
@@ -132,13 +158,14 @@ const OptionSection: React.FC<{
                 Savings Required:{" "}
                 <p>
                     {formatter.format(
-                        housePrice -
-                            loanAmount +
-                            option.fees.valuationFee +
-                            option.fees.surveyFee +
-                            option.fees.legalFee +
-                            housePrice * 0.01 + // stamp duty
-                            option.fees.searchFee
+                        savingsRequired(housePrice - loanAmount, config.fees)
+                        // housePrice -
+                        //     loanAmount +
+                        //     config.fees.valuationFee +
+                        //     config.fees.surveyFee +
+                        //     config.fees.legalFee +
+                        //     housePrice * 0.01 + // stamp duty
+                        //     config.fees.searchFee
                     )}
                 </p>
             </h3>

@@ -2,7 +2,7 @@ input[type="checkbox"] {
     height: 1rem;
     width: 1rem;
     font-size: 1em;
-    margin: 0.5rem;
+    margin-left: 0.5rem;
 }
 
 input[type="number"] {
@@ -27,14 +27,17 @@ button {
     color: white;
     border: none;
     border-radius: 2rem;
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
+    padding: .75rem 1rem;
+    font-size: auto;
     cursor: pointer;
-    max-width: 65%;
+    max-height: 3rem;
+    max-width: 10rem;
 }
 
 label {
     font-weight: bold;
+    display: block;
+    margin-top: 0.5rem;
 }
 
 input[type="text"],
