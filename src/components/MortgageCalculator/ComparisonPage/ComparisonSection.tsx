@@ -50,7 +50,6 @@ const OptionSection: React.FC<{
     const [housePrice, setHousePrice] = React.useState(
         mortgageProps.housePrice
     );
-    const useOneInterestRate = config.fixedInterestRate !== undefined;
     const [interestRate, setInterestRate] = React.useState(3.8);
 
     const maxLoanAmount = config.maxLoanAmount;
@@ -126,10 +125,10 @@ const OptionSection: React.FC<{
                 Set to max
             </button>
 
-            {!useOneInterestRate && (
+            {!config.useOneInterestRate && (
                 <>
                     <br />
-                    <label>
+                    <label style={{ marginTop: "2rem" }}>
                         Interest Rate (%)
                         <input
                             type="number"

@@ -9,6 +9,7 @@ export interface LoanConfig {
     fixedInterestRate: number;
     maxLoanAmount: number | undefined;
     mortgageTerm: number;
+    useOneInterestRate: boolean;
 }
 export const LoanConfigContext = React.createContext<LoanConfig>({
     fees: {
@@ -22,6 +23,7 @@ export const LoanConfigContext = React.createContext<LoanConfig>({
     fixedInterestRate: 3.8,
     maxLoanAmount: undefined,
     mortgageTerm: 35,
+    useOneInterestRate: true,
 });
 
 const ComparisonPage: React.FC<ComparisonPageProps> = () => {
@@ -99,6 +101,7 @@ const ComparisonPage: React.FC<ComparisonPageProps> = () => {
                     fixedInterestRate: interestRate,
                     maxLoanAmount,
                     mortgageTerm,
+                    useOneInterestRate,
                 }}
             >
                 <ComparisonSection
