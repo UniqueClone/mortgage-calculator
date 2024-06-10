@@ -30,7 +30,7 @@ const ComparisonPage: React.FC<ComparisonPageProps> = () => {
     const [interestRate, setInterestRate] = React.useState<number>(3.8);
     const [maxLoanAmount, setMaxLoanAmount] = React.useState<
         number | undefined
-    >(407213);
+    >(undefined);
     const [mortgageTerm, setMortgageTerm] = React.useState<number>(35);
 
     return (
@@ -103,13 +103,13 @@ const ComparisonPage: React.FC<ComparisonPageProps> = () => {
             >
                 <ComparisonSection
                     option1={{
-                        housePrice: 450000,
+                        housePrice: 440000,
                     }}
                     option2={{
-                        housePrice: 453000,
+                        housePrice: 450000,
                     }}
                     option3={{
-                        housePrice: 455000,
+                        housePrice: 460000,
                     }}
                 />
             </LoanConfigContext.Provider>

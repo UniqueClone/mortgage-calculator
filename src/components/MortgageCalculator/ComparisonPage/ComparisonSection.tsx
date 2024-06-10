@@ -107,10 +107,12 @@ const OptionSection: React.FC<{
                             )
                         )
                     }
+                    style={{ marginBottom: "1rem" }}
                 />
             </label>
 
             <button
+                type="button"
                 onClick={() =>
                     setLoanAmount(
                         cleanLoanAmount(
@@ -121,7 +123,7 @@ const OptionSection: React.FC<{
                     )
                 }
             >
-                Set loan amount to max
+                Set to max
             </button>
 
             {!useOneInterestRate && (

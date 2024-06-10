@@ -28,10 +28,10 @@ button {
     border: none;
     border-radius: 2rem;
     padding: .75rem 1rem;
-    font-size: auto;
+    font-size: 0.8rem;
     cursor: pointer;
-    max-height: 3rem;
-    max-width: 10rem;
+    max-height: 2.25rem;
+    margin-bottom: 0.5rem;
 }
 
 label {
