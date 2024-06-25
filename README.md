@@ -1,30 +1,21 @@
-# React + TypeScript + Vite
+# Mortgage Calculator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a simple mortgage calculator that calculates the monthly payment for a fixed-rate mortgage. The user can input the loan amount, interest rate, and loan term in years. The calculator will then output the monthly payment.
 
-Currently, two official plugins are available:
+**IMPORTANT**: The calculator assumes that the interest rate is fixed for the entire term of the loan.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## How to Use
 
-## Expanding the ESLint configuration
+This calculator allows the user to decide if they want to compare three different loan options. The user can input the house value, loan amount and interest rate for each loan option. The calculator will then output the monthly payment for each loan option.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+The user can also decide to use a single interest rate for all three loan options. In this case, the user only needs to input the house value and loan amount for each loan option. The calculator will then output the monthly payment for each loan option using the single interest rate.
 
-- Configure the top-level `parserOptions` property like this:
+## Example
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+Suppose you want to buy a house that costs €500,000. You have three loan options:
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+1. Loan Option 1: Loan amount of €400,000 with an interest rate of 3.5%
+2. Loan Option 2: Loan amount of €350,000 with an interest rate of 3.0%
+3. Loan Option 3: Loan amount of €300,000 with an interest rate of 2.5%
+
+TODO: Insert example output here
