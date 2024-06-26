@@ -1,4 +1,4 @@
-import { ITextFieldStyles, Slider, TextField } from "@fluentui/react";
+import { ITextFieldStyles, TextField } from "@fluentui/react";
 
 export interface TermInputProps {
     term: number;
