@@ -12,7 +12,7 @@ import {
     getMonthlyPayment,
     savingsRequired,
     setLoanAmountToMax,
-} from "../MortgageCalculator/MortgageCalculator.mapper";
+} from "./MortgageDetails.mapper";
 
 export interface MortgageDetailsProps {
     interestRate: number | undefined;
