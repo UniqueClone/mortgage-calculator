@@ -14,7 +14,7 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
     const [useGlobalInterestRate, setUseGlobalInterestRate] =
         React.useState(true);
 
-    const [maxLoan, setMaxLoan] = React.useState(407213);
+    const [maxLoan, setMaxLoan] = React.useState(0);
 
     const [term, setTerm] = React.useState(35);
 
