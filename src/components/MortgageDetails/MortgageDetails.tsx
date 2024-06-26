@@ -27,8 +27,8 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
     const [localInterestRate, setLocalInterestRate] = React.useState<
         number | undefined
     >(interestRate ?? 4.0);
-    const [houseValue, setHouseValue] = React.useState<number>(455028);
-    const [loanAmount, setLoanAmount] = React.useState<number>(407213);
+    const [houseValue, setHouseValue] = React.useState<number>(0);
+    const [loanAmount, setLoanAmount] = React.useState<number>(0);
 
     const containerStackStyles = {
         root: { alignItems: "center" },
