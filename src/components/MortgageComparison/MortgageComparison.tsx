@@ -1,4 +1,4 @@
-import { Stack } from "@fluentui/react";
+import { Icon, Link, Stack, Text } from "@fluentui/react";
 import React from "react";
 import { InterestRate } from "../InterestRate/InterestRate";
 import { MaxLoanInput } from "../MaxLoanInput/MaxLoanInput";
@@ -9,7 +9,7 @@ export interface MortgageComparisonProps {}
 
 export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
     const [interestRate, setInterestRate] = React.useState<number | undefined>(
-        3.8
+        4
     );
     const [useGlobalInterestRate, setUseGlobalInterestRate] =
         React.useState(true);
@@ -27,18 +27,14 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
     return (
         <Stack styles={containerStackStyles} tokens={containerStackTokens}>
             <h1>Mortgage Comparison</h1>
-
             <InterestRate
                 interestRate={interestRate}
                 setInterestRate={setInterestRate}
                 useGlobalInterestRate={useGlobalInterestRate}
                 setUseGlobalInterestRate={setUseGlobalInterestRate}
             />
-
             <MaxLoanInput maxLoan={maxLoan} setMaxLoan={setMaxLoan} />
-
             <TermInput term={term} setTerm={setTerm} />
-
             <Stack horizontal tokens={comparisonStackTokens} wrap>
                 <MortgageOption
                     id={1}
@@ -61,6 +57,18 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
                     {...{ interestRate, useGlobalInterestRate, maxLoan, term }}
                 />
             </Stack>
+
+            <br />
+
+            <Text variant="medium">
+                If you found this useful, consider{" "}
+                <Link
+                    target="_blank"
+                    href="https://www.buymeacoffee.com/ryanlynch"
+                >
+                    buying me a coffee! <Icon iconName="CoffeeScript" />{" "}
+                </Link>
+            </Text>
         </Stack>
     );
 };
