@@ -67,7 +67,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
         <Stack styles={containerStackStyles} tokens={containerStackTokens}>
             <Stack.Item grow>
                 <TextField
-                    defaultValue={0}
+                    defaultValue={"0"}
                     label="House Price"
                     onChange={(_e, newValue) => {
                         if (newValue === undefined) {
@@ -80,7 +80,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                     }}
                     prefix="€"
                     type="number"
-                    value={houseValue}
+                    value={houseValue.toString()}
                 />
             </Stack.Item>
 
@@ -97,7 +97,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                         }}
                         suffix="%"
                         type="number"
-                        value={localInterestRate}
+                        value={localInterestRate?.toString()}
                     />
                 </Stack.Item>
             )}
@@ -110,7 +110,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                     }}
                     prefix="€"
                     type="number"
-                    value={loanAmount}
+                    value={loanAmount.toString()}
                 />
             </Stack.Item>
 
