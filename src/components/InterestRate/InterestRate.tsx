@@ -47,7 +47,7 @@ export const InterestRate: React.FC<InterestRateProps> = (
                     type="number"
                     label="Interest Rate"
                     styles={defaultTextFieldStyles}
-                    value={interestRate}
+                    value={interestRate?.toString()}
                     onChange={(_e, newValue) => {
                         if (newValue === undefined) {
                             return;
