@@ -52,3 +52,11 @@ export const getMonthlyPayment = (
     const denominator = (1 + monthlyInterestRate) ** numberOfPayments - 1;
     return parseFloat((numerator / denominator).toFixed(2));
 };
+
+export const setLoanAmountToMax = (houseValue: number, maxLoanAmount: number, setLoanAmount: (newValue: number) => void) => {
+    if (houseValue * 0.9 > maxLoanAmount) {
+        setLoanAmount(maxLoanAmount);
+    } else {
+        setLoanAmount(houseValue * 0.9);
+    }
+}
