@@ -24,9 +24,10 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
     props: MortgageDetailsProps
 ) => {
     const { interestRate, maxLoan, term } = props;
-    const [localInterestRate, setLocalInterestRate] = React.useState<
-        number | undefined
-    >(interestRate ?? 4.0);
+    console.log(interestRate);
+    const [localInterestRate, setLocalInterestRate] = React.useState<number>(
+        interestRate ?? 4.0
+    );
     const [houseValue, setHouseValue] = React.useState<number>(0);
     const [loanAmount, setLoanAmount] = React.useState<number>(0);
 
@@ -156,7 +157,11 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
             <Stack.Item grow>
                 <Text variant="xLarge" style={{ color: "lightgreen" }}>
                     {formatter.format(
-                        getMonthlyPayment(loanAmount, interestRate ?? 3.8, term)
+                        getMonthlyPayment(
+                            loanAmount,
+                            interestRate ?? localInterestRate,
+                            term
+                        )
                     )}
                 </Text>
             </Stack.Item>
