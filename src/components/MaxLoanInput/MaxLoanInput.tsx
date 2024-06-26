@@ -19,7 +19,7 @@ export const MaxLoanInput: React.FC<MaxLoanInputProps> = (
             type="number"
             label="Max Loan"
             styles={defaultTextFieldStyles}
-            value={maxLoan}
+            value={maxLoan.toString()}
             onChange={(_e, newValue) => {
                 if (newValue === undefined) {
                     return;
