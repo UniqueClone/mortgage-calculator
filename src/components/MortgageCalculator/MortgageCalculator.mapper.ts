@@ -8,8 +8,8 @@ export interface MortgageFees {
     landRegistryFee: number;
 }
 
-export const savingsRequired = (deposit: number, fees: MortgageFees) => {
-    return deposit + fees.valuationFee + fees.surveyFee + fees.legalFee + (fees.stampDuty ?? deposit / 10) + fees.searchFee + fees.registerOfDeedsFee + fees.landRegistryFee;
+export const savingsRequired = (houseValue: number, deposit: number, fees: MortgageFees) => {
+    return deposit + fees.valuationFee + fees.surveyFee + fees.legalFee + (fees.stampDuty ?? (houseValue / 100)) + fees.searchFee + fees.registerOfDeedsFee + fees.landRegistryFee;
 };
 
 export const formatter = new Intl.NumberFormat("en-IE", {

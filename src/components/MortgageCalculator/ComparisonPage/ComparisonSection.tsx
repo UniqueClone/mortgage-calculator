@@ -57,6 +57,16 @@ const OptionSection: React.FC<{
         cleanLoanAmount(housePrice, housePrice * 0.9, maxLoanAmount)
     );
 
+    const [requiredSavings, setRequiredSavings] = React.useState(
+        savingsRequired(housePrice, housePrice - loanAmount, config.fees)
+    );
+
+    useEffect(() => {
+        setRequiredSavings(
+            savingsRequired(housePrice, housePrice - loanAmount, config.fees)
+        );
+    }, [housePrice, loanAmount, config.fees]);
+
     useEffect(() => {
         setHousePrice(housePrice);
         setLoanAmount(cleanLoanAmount(housePrice, loanAmount, maxLoanAmount));
