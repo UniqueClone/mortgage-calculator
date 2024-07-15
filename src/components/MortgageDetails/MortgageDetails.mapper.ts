@@ -54,7 +54,7 @@ export const getMonthlyPayment = (
 };
 
 export const setLoanAmountToMax = (houseValue: number, maxLoanAmount: number, setLoanAmount: (newValue: number) => void) => {
-    if (houseValue * 0.9 > maxLoanAmount) {
+    if (houseValue * 0.9 > maxLoanAmount && maxLoanAmount > 0) {
         setLoanAmount(maxLoanAmount);
     } else {
         setLoanAmount(houseValue * 0.9);
