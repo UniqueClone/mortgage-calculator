@@ -1,9 +1,11 @@
-import { Icon, Link, Stack, Text } from "@fluentui/react";
+import { Icon, Link, PrimaryButton, Stack, Text } from "@fluentui/react";
 import React from "react";
 import { InterestRate } from "../InterestRate/InterestRate";
 import { MaxLoanInput } from "../MaxLoanInput/MaxLoanInput";
 import { TermInput } from "../TermInput/TermInput";
 import { MortgageDetails } from "../MortgageDetails/MortgageDetails";
+import { MortgageFees } from "../MortgageDetails/MortgageDetails.mapper";
+import { FeesPanel } from "../FeesPanel/FeesPanel";
 
 export interface MortgageComparisonProps {}
 
@@ -17,6 +19,18 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
     const [maxLoan, setMaxLoan] = React.useState(0);
 
     const [term, setTerm] = React.useState(35);
+
+    const [fees, setFees] = React.useState<MortgageFees>({
+        valuationFee: 185,
+        surveyFee: 600,
+        // legalFee: 3382.5,
+        legalFee: 3400,
+        searchFee: 250,
+        registerOfDeedsFee: 100,
+        landRegistryFee: 975,
+    });
+
+    const [isPanelOpen, setIsPanelOpen] = React.useState(false);
 
     const containerStackStyles = {
         root: { alignItems: "center" },
@@ -33,10 +47,18 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
                 useGlobalInterestRate={useGlobalInterestRate}
                 setUseGlobalInterestRate={setUseGlobalInterestRate}
             />
+
             <MaxLoanInput maxLoan={maxLoan} setMaxLoan={setMaxLoan} />
+
             <TermInput term={term} setTerm={setTerm} />
+
+            <PrimaryButton onClick={() => setIsPanelOpen(true)}>
+                View/Edit Fees
+            </PrimaryButton>
+
             <Stack horizontal tokens={comparisonStackTokens} wrap>
                 <MortgageOption
+                    fees={fees}
                     id={1}
                     interestRate={interestRate}
                     useGlobalInterestRate={useGlobalInterestRate}
@@ -45,6 +67,7 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
                 />
 
                 <MortgageOption
+                    fees={fees}
                     id={2}
                     interestRate={interestRate}
                     useGlobalInterestRate={useGlobalInterestRate}
@@ -53,6 +76,7 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
                 />
 
                 <MortgageOption
+                    fees={fees}
                     id={3}
                     {...{ interestRate, useGlobalInterestRate, maxLoan, term }}
                 />
@@ -77,11 +101,19 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
                     buying me a coffee! <Icon iconName="CoffeeScript" />{" "}
                 </Link>
             </Text>
+
+            <FeesPanel
+                fees={fees}
+                setFees={setFees}
+                isPanelOpen={isPanelOpen}
+                setIsPanelOpen={setIsPanelOpen}
+            />
         </Stack>
     );
 };
 
 interface MortgageOptionProps {
+    fees: MortgageFees;
     id: number;
     interestRate: number | undefined;
     useGlobalInterestRate: boolean;
@@ -92,7 +124,8 @@ interface MortgageOptionProps {
 const MortgageOption: React.FC<MortgageOptionProps> = (
     props: MortgageOptionProps
 ) => {
-    const { id, interestRate, useGlobalInterestRate, maxLoan, term } = props;
+    const { fees, id, interestRate, useGlobalInterestRate, maxLoan, term } =
+        props;
 
     return (
         <Stack.Item grow>
@@ -100,6 +133,7 @@ const MortgageOption: React.FC<MortgageOptionProps> = (
                 <h2>Option {id}</h2>
 
                 <MortgageDetails
+                    fees={fees}
                     interestRate={
                         useGlobalInterestRate ? interestRate : undefined
                     }
