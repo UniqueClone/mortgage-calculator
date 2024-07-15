@@ -15,6 +15,7 @@ import {
 } from "./MortgageDetails.mapper";
 
 export interface MortgageDetailsProps {
+    fees: MortgageFees;
     interestRate: number | undefined;
     maxLoan: number;
     term: number;
@@ -23,7 +24,7 @@ export interface MortgageDetailsProps {
 export const MortgageDetails: React.FC<MortgageDetailsProps> = (
     props: MortgageDetailsProps
 ) => {
-    const { interestRate, maxLoan, term } = props;
+    const { fees, interestRate, maxLoan, term } = props;
     console.log(interestRate);
     const [localInterestRate, setLocalInterestRate] = React.useState<number>(
         interestRate ?? 4.0
@@ -35,15 +36,6 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
         root: { alignItems: "center" },
     };
     const containerStackTokens = { childrenGap: 30 };
-
-    const fees: MortgageFees = {
-        valuationFee: 185,
-        surveyFee: 600,
-        legalFee: 3382.5,
-        searchFee: 250,
-        registerOfDeedsFee: 100,
-        landRegistryFee: 975,
-    };
 
     const handleLoanAmountChange = (newValue: string | undefined) => {
         if (newValue === undefined) {
