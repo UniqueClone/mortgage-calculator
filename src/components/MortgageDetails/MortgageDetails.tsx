@@ -1,4 +1,5 @@
 import {
+    Icon,
     PrimaryButton,
     Stack,
     Text,
@@ -151,7 +152,10 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                     className="tooltip"
                     tooltipProps={{
                         onRenderContent: () => (
-                            <Stack tokens={{ childrenGap: 10 }}>
+                            <Stack
+                                tokens={{ childrenGap: 10 }}
+                                horizontalAlign="end"
+                            >
                                 <Text variant="medium">
                                     Deposit:{" "}
                                     {formatter.format(houseValue - loanAmount)}
@@ -161,6 +165,10 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                                     {formatter.format(
                                         savingsRequired(0, 0, fees)
                                     )}
+                                </Text>
+                                <Text variant="medium">
+                                    Stamp Duty:{" "}
+                                    {formatter.format(houseValue * 0.1)}
                                 </Text>
                             </Stack>
                         ),
@@ -175,6 +183,10 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                             )
                         )}{" "}
                     </Text>
+                    <Icon
+                        iconName="Info"
+                        style={{ fontSize: "0.85rem", color: "lightgreen" }}
+                    />
                 </TooltipHost>
             </Stack.Item>
 
