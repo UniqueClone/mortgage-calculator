@@ -111,16 +111,6 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                         })
                     }
                 />
-
-                <br />
-
-                {/* <PrimaryButton
-                        onClick={() => {
-                            setIsPanelOpen(false);
-                        }}
-                    >
-                        Close
-                    </PrimaryButton> */}
             </Stack>
         </Panel>
     );
