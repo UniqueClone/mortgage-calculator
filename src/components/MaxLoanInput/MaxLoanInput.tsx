@@ -1,4 +1,9 @@
-import { ITextFieldStyles, TextField } from "@fluentui/react";
+import {
+    ITextFieldStyles,
+    Icon,
+    TextField,
+    TooltipHost,
+} from "@fluentui/react";
 
 export interface MaxLoanInputProps {
     maxLoan: number;
@@ -17,7 +22,24 @@ export const MaxLoanInput: React.FC<MaxLoanInputProps> = (
     return (
         <TextField
             type="number"
-            label="Max Loan"
+            onRenderLabel={() => {
+                return (
+                    <div>
+                        Max Loan{" "}
+                        <TooltipHost
+                            className="tooltip"
+                            content="If you have your mortgage approval, you can put the max loan amount here. 
+                            Note: This is not the house value, it is the house value minus your deposit."
+                            id="maxLoanTooltip"
+                        >
+                            <Icon
+                                iconName="Info"
+                                style={{ fontSize: "0.7778rem" }}
+                            />
+                        </TooltipHost>
+                    </div>
+                );
+            }}
             styles={defaultTextFieldStyles}
             value={maxLoan.toString()}
             onChange={(_e, newValue) => {
