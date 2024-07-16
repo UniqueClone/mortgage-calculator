@@ -25,7 +25,6 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
     props: MortgageDetailsProps
 ) => {
     const { fees, interestRate, maxLoan, term } = props;
-    console.log(interestRate);
     const [localInterestRate, setLocalInterestRate] = React.useState<number>(
         interestRate ?? 4.0
     );
@@ -45,7 +44,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
             return;
         } else if (isNaN(parseFloat(newValue))) {
             return;
-        } else if (parseFloat(newValue) > maxLoan) {
+        } else if (parseFloat(newValue) > maxLoan && maxLoan > 0) {
             setLoanAmount(maxLoan);
             return;
         } else if (parseFloat(newValue) < 0) {
@@ -60,7 +59,6 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
         <Stack styles={containerStackStyles} tokens={containerStackTokens}>
             <Stack.Item grow>
                 <TextField
-                    defaultValue={"0"}
                     label="House Price"
                     onChange={(_e, newValue) => {
                         if (newValue === undefined) {
@@ -109,6 +107,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
 
             <Stack.Item grow>
                 <TooltipHost
+                    className="tooltip"
                     content="The maximum loan amount you can borrow is 90% of the house value, or the max loan amount you have set."
                     directionalHint={5}
                 >
@@ -131,15 +130,35 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
             </Stack.Item>
 
             <Stack.Item grow>
-                <Text variant="xLarge" style={{ color: "lightgreen" }}>
-                    {formatter.format(
-                        savingsRequired(
-                            houseValue,
-                            houseValue - loanAmount,
-                            fees
-                        )
-                    )}
-                </Text>
+                <TooltipHost
+                    className="tooltip"
+                    tooltipProps={{
+                        onRenderContent: () => (
+                            <Stack tokens={{ childrenGap: 10 }}>
+                                <Text variant="medium">
+                                    Deposit:{" "}
+                                    {formatter.format(houseValue - loanAmount)}
+                                </Text>
+                                <Text variant="medium">
+                                    Fees:{" "}
+                                    {formatter.format(
+                                        savingsRequired(0, 0, fees)
+                                    )}
+                                </Text>
+                            </Stack>
+                        ),
+                    }}
+                >
+                    <Text variant="xLarge" style={{ color: "lightgreen" }}>
+                        {formatter.format(
+                            savingsRequired(
+                                houseValue,
+                                houseValue - loanAmount,
+                                fees
+                            )
+                        )}{" "}
+                    </Text>
+                </TooltipHost>
             </Stack.Item>
 
             <Stack.Item grow>

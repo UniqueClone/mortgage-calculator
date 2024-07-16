@@ -78,7 +78,10 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
                 <MortgageOption
                     fees={fees}
                     id={3}
-                    {...{ interestRate, useGlobalInterestRate, maxLoan, term }}
+                    interestRate={interestRate}
+                    useGlobalInterestRate={useGlobalInterestRate}
+                    maxLoan={maxLoan}
+                    term={term}
                 />
             </Stack>
 
