@@ -60,9 +60,26 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                     }
                 />
 
+                <h2
+                    style={{
+                        fontWeight: "600",
+                        fontSize: "1rem",
+                        margin: "2rem 0 0 0",
+                    }}
+                >
+                    Legal Fees and Outlays
+                </h2>
+
+                <Text variant="medium">
+                    This is some text about legal fees and outlays.
+                </Text>
+
                 <TextField
-                    label="Legal Fee"
+                    label="Legal Fees"
                     prefix="€"
+                    styles={{
+                        root: { marginTop: "0.5rem !important" },
+                    }}
                     type="number"
                     value={fees.legalFee.toString()}
                     onChange={(_, newValue) =>
@@ -74,7 +91,7 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                 />
 
                 <TextField
-                    label="Search Fee"
+                    label="Law Searches Fee"
                     prefix="€"
                     type="number"
                     value={fees.searchFee.toString()}

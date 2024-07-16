@@ -24,7 +24,7 @@ export const MaxLoanInput: React.FC<MaxLoanInputProps> = (
             type="number"
             onRenderLabel={() => {
                 return (
-                    <div>
+                    <div style={{ cursor: "default" }}>
                         Max Loan{" "}
                         <TooltipHost
                             className="tooltip"
@@ -34,7 +34,10 @@ export const MaxLoanInput: React.FC<MaxLoanInputProps> = (
                         >
                             <Icon
                                 iconName="Info"
-                                style={{ fontSize: "0.7778rem" }}
+                                style={{
+                                    fontSize: "0.85rem",
+                                    color: "lightgreen",
+                                }}
                             />
                         </TooltipHost>
                     </div>

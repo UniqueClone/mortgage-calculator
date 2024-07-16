@@ -108,7 +108,7 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
 
             <br />
 
-            <Text variant="medium" style={{ maxWidth: "60%" }}>
+            <Text variant="medium" style={{ width: "70%" }}>
                 <strong>Disclaimer:</strong> This is a simple mortgage
                 comparison tool that calculates monthly payments based on the
                 interest rate, loan amount, and term. The numbers are all
