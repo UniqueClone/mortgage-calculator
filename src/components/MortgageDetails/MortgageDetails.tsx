@@ -168,7 +168,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                                 </Text>
                                 <Text variant="medium">
                                     Stamp Duty:{" "}
-                                    {formatter.format(houseValue * 0.1)}
+                                    {formatter.format(houseValue * 0.01)}
                                 </Text>
                             </Stack>
                         ),
