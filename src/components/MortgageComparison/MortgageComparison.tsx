@@ -20,14 +20,21 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
 
     const [term, setTerm] = React.useState(35);
 
-    const [fees, setFees] = React.useState<MortgageFees>({
-        valuationFee: 185,
-        surveyFee: 600,
-        // legalFee: 3382.5,
-        legalFee: 3400,
-        searchFee: 250,
-        registerOfDeedsFee: 100,
-        landRegistryFee: 975,
+    const [fees, setFees] = React.useState<MortgageFees>(() => {
+        const savedFees = localStorage.getItem("fees");
+        if (savedFees) {
+            return JSON.parse(savedFees);
+        } else {
+            return {
+                valuationFee: 185,
+                surveyFee: 600,
+                // legalFee: 3382.5,
+                legalFee: 3400,
+                searchFee: 250,
+                registerOfDeedsFee: 100,
+                landRegistryFee: 975,
+            };
+        }
     });
 
     const [isPanelOpen, setIsPanelOpen] = React.useState(false);
@@ -37,6 +44,10 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
     };
     const containerStackTokens = { childrenGap: 30 };
     const comparisonStackTokens = { childrenGap: 40 };
+
+    React.useEffect(() => {
+        localStorage.setItem("fees", JSON.stringify(fees));
+    }, [fees]);
 
     return (
         <Stack styles={containerStackStyles} tokens={containerStackTokens}>
