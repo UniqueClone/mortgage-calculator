@@ -5,7 +5,7 @@ import {
     TextField,
     TooltipHost,
 } from "@fluentui/react";
-import React from "react";
+import React, { useEffect } from "react";
 import {
     MortgageFees,
     formatter,
@@ -15,6 +15,7 @@ import {
 } from "./MortgageDetails.mapper";
 
 export interface MortgageDetailsProps {
+    id: number;
     fees: MortgageFees;
     interestRate: number | undefined;
     maxLoan: number;
@@ -24,12 +25,21 @@ export interface MortgageDetailsProps {
 export const MortgageDetails: React.FC<MortgageDetailsProps> = (
     props: MortgageDetailsProps
 ) => {
-    const { fees, interestRate, maxLoan, term } = props;
+    const { id, fees, interestRate, maxLoan, term } = props;
+
+    const localStorageData = localStorage.getItem("mortgageOption" + id);
+
     const [localInterestRate, setLocalInterestRate] = React.useState<number>(
-        interestRate ?? 4.0
+        localStorageData
+            ? JSON.parse(localStorageData).interestRate
+            : interestRate ?? 4.0
     );
-    const [houseValue, setHouseValue] = React.useState<number>(0);
-    const [loanAmount, setLoanAmount] = React.useState<number>(0);
+    const [houseValue, setHouseValue] = React.useState<number>(
+        localStorageData ? JSON.parse(localStorageData).houseValue : 0
+    );
+    const [loanAmount, setLoanAmount] = React.useState<number>(
+        localStorageData ? JSON.parse(localStorageData).loanAmount : 0
+    );
 
     const containerStackStyles = {
         root: { alignItems: "center" },
@@ -54,6 +64,13 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
             setLoanAmount(parseFloat(newValue));
         }
     };
+
+    useEffect(() => {
+        localStorage.setItem(
+            "mortgageOption" + id,
+            JSON.stringify({ houseValue, loanAmount, localInterestRate })
+        );
+    }, [houseValue, loanAmount, localInterestRate, id]);
 
     return (
         <Stack styles={containerStackStyles} tokens={containerStackTokens}>

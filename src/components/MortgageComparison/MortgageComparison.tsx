@@ -1,5 +1,5 @@
 import { Icon, Link, PrimaryButton, Stack, Text } from "@fluentui/react";
-import React from "react";
+import React, { useEffect } from "react";
 import { InterestRate } from "../InterestRate/InterestRate";
 import { MaxLoanInput } from "../MaxLoanInput/MaxLoanInput";
 import { TermInput } from "../TermInput/TermInput";
@@ -10,25 +10,33 @@ import { FeesPanel } from "../FeesPanel/FeesPanel";
 export interface MortgageComparisonProps {}
 
 export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
+    const savedMortgageDetails = localStorage.getItem("mortgageDetails");
+    const parsedMortgageDetails = JSON.parse(savedMortgageDetails ?? "{}");
+
     const [interestRate, setInterestRate] = React.useState<number | undefined>(
-        4
+        parsedMortgageDetails.interestRate ?? 4.0
     );
-    const [useGlobalInterestRate, setUseGlobalInterestRate] =
-        React.useState(true);
+    const [useGlobalInterestRate, setUseGlobalInterestRate] = React.useState(
+        parsedMortgageDetails.useGlobalInterestRate ?? true
+    );
 
-    const [maxLoan, setMaxLoan] = React.useState(0);
+    const [maxLoan, setMaxLoan] = React.useState(
+        parsedMortgageDetails.maxLoan ?? 0
+    );
 
-    const [term, setTerm] = React.useState(35);
+    const [term, setTerm] = React.useState(parsedMortgageDetails.term ?? 35);
 
-    const [fees, setFees] = React.useState<MortgageFees>({
-        valuationFee: 185,
-        surveyFee: 600,
-        // legalFee: 3382.5,
-        legalFee: 3400,
-        searchFee: 250,
-        registerOfDeedsFee: 100,
-        landRegistryFee: 975,
-    });
+    const [fees, setFees] = React.useState<MortgageFees>(
+        parsedMortgageDetails.fees ?? {
+            valuationFee: 185,
+            surveyFee: 600,
+            // legalFee: 3382.5,
+            legalFee: 3400,
+            searchFee: 250,
+            registerOfDeedsFee: 100,
+            landRegistryFee: 975,
+        }
+    );
 
     const [isPanelOpen, setIsPanelOpen] = React.useState(false);
 
@@ -37,6 +45,19 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
     };
     const containerStackTokens = { childrenGap: 30 };
     const comparisonStackTokens = { childrenGap: 40 };
+
+    useEffect(() => {
+        localStorage.setItem(
+            "mortgageDetails",
+            JSON.stringify({
+                fees,
+                interestRate,
+                useGlobalInterestRate,
+                maxLoan,
+                term,
+            })
+        );
+    }, [fees, interestRate, useGlobalInterestRate, maxLoan, term]);
 
     return (
         <Stack styles={containerStackStyles} tokens={containerStackTokens}>
@@ -136,6 +157,7 @@ const MortgageOption: React.FC<MortgageOptionProps> = (
                 <h2>Option {id}</h2>
 
                 <MortgageDetails
+                    id={id}
                     fees={fees}
                     interestRate={
                         useGlobalInterestRate ? interestRate : undefined
