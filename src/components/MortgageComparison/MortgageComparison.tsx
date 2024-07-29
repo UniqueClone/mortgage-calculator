@@ -31,7 +31,7 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
             valuationFee: 185,
             surveyFee: 600,
             // legalFee: 3382.5,
-            legalFee: 3400,
+            legalFee: 2800,
             searchFee: 250,
             registerOfDeedsFee: 100,
             landRegistryFee: 975,
