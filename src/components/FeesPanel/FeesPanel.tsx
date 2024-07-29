@@ -38,7 +38,7 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                     label="Valuation Fee"
                     prefix="€"
                     type="number"
-                    value={fees.valuationFee.toString()}
+                    value={fees.valuationFee?.toString()}
                     onChange={(_, newValue) =>
                         setFees({
                             ...fees,
@@ -51,7 +51,7 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                     label="Survey Fee"
                     prefix="€"
                     type="number"
-                    value={fees.surveyFee.toString()}
+                    value={fees.surveyFee?.toString()}
                     onChange={(_, newValue) =>
                         setFees({
                             ...fees,
@@ -84,7 +84,7 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                         root: { marginTop: "0.5rem !important" },
                     }}
                     type="number"
-                    value={fees.legalFee.toString()}
+                    value={fees.legalFee?.toString()}
                     onChange={(_, newValue) =>
                         setFees({
                             ...fees,
@@ -97,7 +97,7 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                     label="Law Searches Fee"
                     prefix="€"
                     type="number"
-                    value={fees.searchFee.toString()}
+                    value={fees.searchFee?.toString()}
                     onChange={(_, newValue) =>
                         setFees({
                             ...fees,
@@ -110,7 +110,7 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                     label="Register of Deeds Fee"
                     prefix="€"
                     type="number"
-                    value={fees.registerOfDeedsFee.toString()}
+                    value={fees.registerOfDeedsFee?.toString()}
                     onChange={(_, newValue) =>
                         setFees({
                             ...fees,
@@ -123,7 +123,7 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                     label="Land Registry Fee"
                     prefix="€"
                     type="number"
-                    value={fees.landRegistryFee.toString()}
+                    value={fees.landRegistryFee?.toString()}
                     onChange={(_, newValue) =>
                         setFees({
                             ...fees,
