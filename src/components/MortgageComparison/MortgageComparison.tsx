@@ -119,8 +119,9 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
             <Text variant="medium">
                 If you found this useful, consider{" "}
                 <Link
-                    target="_blank"
                     href="https://www.buymeacoffee.com/ryanlynch"
+                    style={{ color: "rgb(33, 171, 56)" }}
+                    target="_blank"
                 >
                     buying me a coffee! <Icon iconName="CoffeeScript" />{" "}
                 </Link>

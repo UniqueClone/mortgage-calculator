@@ -64,14 +64,17 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                     style={{
                         fontWeight: "600",
                         fontSize: "1rem",
-                        margin: "2rem 0 0 0",
+                        marginTop: "2.5rem",
+                        marginBottom: "0rem",
                     }}
                 >
                     Legal Fees and Outlays
                 </h2>
 
                 <Text variant="medium">
-                    This is some text about legal fees and outlays.
+                    An outlay is money spent by the solicitor on your behalf in
+                    the conveyancing process e.g. land registry fees. Your legal
+                    fees are your solicitor fees.
                 </Text>
 
                 <TextField

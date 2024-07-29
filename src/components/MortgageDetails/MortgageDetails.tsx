@@ -123,23 +123,40 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                 />
             </Stack.Item>
 
-            <Stack.Item grow>
+            <Stack.Item
+                grow
+                style={{
+                    margin: "0.5rem 0 0 0",
+                }}
+            >
+                <Text variant="xxLarge">OR</Text>
+            </Stack.Item>
+
+            <Stack.Item
+                grow
+                style={{
+                    margin: "0.5rem 0 0 0",
+                }}
+            >
+                <PrimaryButton
+                    onClick={() =>
+                        setLoanAmountToMax(houseValue, maxLoan, setLoanAmount)
+                    }
+                >
+                    Set loan to max
+                </PrimaryButton>{" "}
                 <TooltipHost
                     className="tooltip"
-                    content="The maximum loan amount you can borrow is 90% of the house value, or the max loan amount you have set."
+                    content="This is 90% of the house value, unless you have set a maximum loan amount above that is less than 90% of the house value. In that case, the maximum loan amount will be used."
                     directionalHint={5}
                 >
-                    <PrimaryButton
-                        onClick={() =>
-                            setLoanAmountToMax(
-                                houseValue,
-                                maxLoan,
-                                setLoanAmount
-                            )
-                        }
-                    >
-                        Set loan to max
-                    </PrimaryButton>
+                    <Icon
+                        iconName="Info"
+                        style={{
+                            fontSize: "0.85rem",
+                            color: "lightgreen",
+                        }}
+                    />
                 </TooltipHost>
             </Stack.Item>
 
