@@ -73,4 +73,4 @@ jobs:
                   publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
                   package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
               env:
-                  VITE_REACT_APP_APPINSIGHTS_CONNECTION_STRING: ${{ secrets.VITE_REACT_APP_APPINSIGHTS_CONNECTION_STRING }}
+                  VITE_APPINSIGHTS_CONNECTION_STRING: ${{ secrets.VITE_APPINSIGHTS_CONNECTION_STRING }}
