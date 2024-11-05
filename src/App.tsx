@@ -6,7 +6,7 @@ import { ReactPlugin } from "@microsoft/applicationinsights-react-js";
 // import { appInsightsConfig } from "./AppInsightsConfig";
 
 const reactPlugin = new ReactPlugin();
-const x = import.meta.env.VITE_APPSETTING_APPINSIGHTS_CONNECTION_STRING;
+const x = import.meta.env.VITE_APPINSIGHTS_CONNECTION_STRING;
 export const appInsights = new ApplicationInsights({
   config: {
     // ...appInsightsConfig,
