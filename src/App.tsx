@@ -3,12 +3,14 @@ import "./App.css";
 import { MortgageComparison } from "./components/MortgageComparison/MortgageComparison";
 import { ApplicationInsights } from "@microsoft/applicationinsights-web";
 import { ReactPlugin } from "@microsoft/applicationinsights-react-js";
-import { appInsightsConfig } from "./AppInsightsConfig";
+// import { appInsightsConfig } from "./AppInsightsConfig";
 
 const reactPlugin = new ReactPlugin();
+const x = import.meta.env.VITE_APPSETTING_APPINSIGHTS_CONNECTION_STRING;
 export const appInsights = new ApplicationInsights({
   config: {
-    ...appInsightsConfig,
+    // ...appInsightsConfig,
+    connectionString: x,
     extensions: [reactPlugin],
     extensionConfig: {},
   },
