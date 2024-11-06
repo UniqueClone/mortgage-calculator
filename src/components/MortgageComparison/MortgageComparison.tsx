@@ -13,7 +13,7 @@ import { TermInput } from "../TermInput/TermInput";
 import { MortgageDetails } from "../MortgageDetails/MortgageDetails";
 import { MortgageFees } from "../MortgageDetails/MortgageDetails.mapper";
 import { FeesPanel } from "../FeesPanel/FeesPanel";
-import { appInsights } from "../../App";
+// import { appInsights } from "../../App";
 
 export interface MortgageComparisonProps {}
 
@@ -147,14 +147,14 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
           href="https://www.buymeacoffee.com/ryanlynch"
           style={{ color: "rgb(33, 171, 56)" }}
           target="_blank"
-          onClick={() => {
-            appInsights.trackEvent({
-              name: "LinkClick",
-              properties: {
-                href: "https://www.buymeacoffee.com/ryanlynch",
-              },
-            });
-          }}
+          // onClick={() => {
+          //   appInsights.trackEvent({
+          //     name: "LinkClick",
+          //     properties: {
+          //       href: "https://www.buymeacoffee.com/ryanlynch",
+          //     },
+          // });
+          // }}
         >
           buying me a coffee! <Icon iconName="CoffeeScript" />{" "}
         </Link>

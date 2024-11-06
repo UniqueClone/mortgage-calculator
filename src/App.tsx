@@ -1,24 +1,21 @@
 import { ThemeProvider, createTheme, initializeIcons } from "@fluentui/react";
 import "./App.css";
 import { MortgageComparison } from "./components/MortgageComparison/MortgageComparison";
-import { ApplicationInsights } from "@microsoft/applicationinsights-web";
-import { ReactPlugin } from "@microsoft/applicationinsights-react-js";
+// import { ApplicationInsights } from "@microsoft/applicationinsights-web";
+// import { ReactPlugin } from "@microsoft/applicationinsights-react-js";
 // import { appInsightsConfig } from "./AppInsightsConfig";
 
-const reactPlugin = new ReactPlugin();
-const x = import.meta.env.VITE_APPINSIGHTS_CONNECTION_STRING;
-console.log(x);
+// const reactPlugin = new ReactPlugin();
 
-export const appInsights = new ApplicationInsights({
-  config: {
-    // ...appInsightsConfig,
-    connectionString: x,
-    extensions: [reactPlugin],
-    extensionConfig: {},
-  },
-});
+// export const appInsights = new ApplicationInsights({
+//   config: {
+//     ...appInsightsConfig,
+//     extensions: [reactPlugin],
+//     extensionConfig: {},
+//   },
+// });
 
-appInsights.loadAppInsights();
+// appInsights.loadAppInsights();
 
 function App() {
   initializeIcons();
