@@ -1,8 +1,7 @@
 import { Panel, PrimaryButton, Stack, Text, TextField } from "@fluentui/react";
 import React from "react";
 import { MortgageFees } from "../MortgageDetails/MortgageDetails.mapper";
-
-interface FeesPanelProps {
+export interface FeesPanelProps {
     fees: MortgageFees;
     setFees: React.Dispatch<React.SetStateAction<MortgageFees>>;
     isPanelOpen: boolean;
