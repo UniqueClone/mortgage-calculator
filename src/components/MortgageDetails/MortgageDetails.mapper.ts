@@ -13,7 +13,7 @@ export const savingsRequired = (
   deposit: number,
   fees: MortgageFees
 ) => {
-  return (
+  const savingsRequired =
     deposit +
     fees.valuationFee +
     fees.surveyFee +
@@ -21,8 +21,13 @@ export const savingsRequired = (
     (fees.stampDuty ?? houseValue / 100) +
     fees.searchFee +
     fees.registerOfDeedsFee +
-    fees.landRegistryFee
-  );
+    fees.landRegistryFee;
+
+    if (savingsRequired < 0) {
+      return 0;
+    } else {
+        return savingsRequired;
+    }
 };
 
 export const formatter = new Intl.NumberFormat("en-IE", {
