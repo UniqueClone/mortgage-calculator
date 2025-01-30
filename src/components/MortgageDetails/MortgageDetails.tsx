@@ -186,7 +186,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                 <Text variant="xxLarge">Savings Required: </Text>
             </Stack.Item>
 
-            <Stack.Item grow>
+            <Stack.Item grow aria-live="polite">
                 <TooltipHost
                     className="tooltip"
                     tooltipProps={{
@@ -212,7 +212,11 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                         ),
                     }}
                 >
-                    <Text variant="xLarge" style={{ color: "lightgreen" }}>
+                    <Text
+                        aria-label={`Savings Required: ${formatter.format(savingsRequired(houseValue, deposit, fees))}`}
+                        variant="xLarge"
+                        style={{ color: "lightgreen" }}
+                    >
                         {formatter.format(
                             savingsRequired(houseValue, deposit, fees)
                         )}{" "}
@@ -225,11 +229,23 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
             </Stack.Item>
 
             <Stack.Item grow>
-                <Text variant="xxLarge">Monthly Payment: </Text>
+                <Text id="monthly-payment" variant="xxLarge">
+                    Monthly Payment:{" "}
+                </Text>
             </Stack.Item>
 
-            <Stack.Item grow>
-                <Text variant="xLarge" style={{ color: "lightgreen" }}>
+            <Stack.Item aria-live="polite" grow>
+                <Text
+                    aria-label={`Monthly Payment: ${formatter.format(
+                        getMonthlyPayment(
+                            loanAmount,
+                            interestRate ?? localInterestRate,
+                            term
+                        )
+                    )}`}
+                    variant="xLarge"
+                    style={{ color: "lightgreen" }}
+                >
                     {formatter.format(
                         getMonthlyPayment(
                             loanAmount,
