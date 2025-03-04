@@ -101,6 +101,7 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
 
             <Stack horizontal tokens={comparisonStackTokens} wrap>
                 <MortgageOption
+                    key={1}
                     fees={fees}
                     firstTimeBuyer={firstTimeBuyer}
                     id={1}
@@ -111,6 +112,7 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
                 />
 
                 <MortgageOption
+                    key={2}
                     fees={fees}
                     firstTimeBuyer={firstTimeBuyer}
                     id={2}
@@ -121,6 +123,7 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
                 />
 
                 <MortgageOption
+                    key={3}
                     fees={fees}
                     firstTimeBuyer={firstTimeBuyer}
                     id={3}
