@@ -60,6 +60,19 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
     };
     const containerStackTokens = { childrenGap: 30 };
 
+    const handleHouseValueChange = (newValue: string | undefined) => {
+        if (newValue === undefined) {
+            return;
+        } else if (newValue === "") {
+            setHouseValue(0);
+            return;
+        } else if (isNaN(parseFloat(newValue))) {
+            return;
+        } else {
+            setHouseValue(parseFloat(newValue));
+        }
+    };
+
     const handleLoanAmountChange = (newValue: string | undefined) => {
         if (newValue === undefined) {
             return;
@@ -96,13 +109,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                 <TextField
                     label="House Price"
                     onChange={(_e, newValue) => {
-                        if (newValue === undefined) {
-                            return;
-                        } else if (isNaN(parseFloat(newValue))) {
-                            return;
-                        } else {
-                            setHouseValue(parseFloat(newValue));
-                        }
+                        handleHouseValueChange(newValue);
                     }}
                     prefix="€"
                     type="number"
@@ -186,7 +193,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                 <Text variant="xxLarge">Savings Required: </Text>
             </Stack.Item>
 
-            <Stack.Item grow>
+            <Stack.Item grow aria-live="polite">
                 <TooltipHost
                     className="tooltip"
                     tooltipProps={{
@@ -212,7 +219,11 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                         ),
                     }}
                 >
-                    <Text variant="xLarge" style={{ color: "lightgreen" }}>
+                    <Text
+                        aria-label={`Savings Required: ${formatter.format(savingsRequired(houseValue, deposit, fees))}`}
+                        variant="xLarge"
+                        style={{ color: "lightgreen" }}
+                    >
                         {formatter.format(
                             savingsRequired(houseValue, deposit, fees)
                         )}{" "}
@@ -225,11 +236,23 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
             </Stack.Item>
 
             <Stack.Item grow>
-                <Text variant="xxLarge">Monthly Payment: </Text>
+                <Text id="monthly-payment" variant="xxLarge">
+                    Monthly Payment:{" "}
+                </Text>
             </Stack.Item>
 
-            <Stack.Item grow>
-                <Text variant="xLarge" style={{ color: "lightgreen" }}>
+            <Stack.Item aria-live="polite" grow>
+                <Text
+                    aria-label={`Monthly Payment: ${formatter.format(
+                        getMonthlyPayment(
+                            loanAmount,
+                            interestRate ?? localInterestRate,
+                            term
+                        )
+                    )}`}
+                    variant="xLarge"
+                    style={{ color: "lightgreen" }}
+                >
                     {formatter.format(
                         getMonthlyPayment(
                             loanAmount,
