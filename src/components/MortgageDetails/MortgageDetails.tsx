@@ -60,6 +60,19 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
     };
     const containerStackTokens = { childrenGap: 30 };
 
+    const handleHouseValueChange = (newValue: string | undefined) => {
+        if (newValue === undefined) {
+            return;
+        } else if (newValue === "") {
+            setHouseValue(0);
+            return;
+        } else if (isNaN(parseFloat(newValue))) {
+            return;
+        } else {
+            setHouseValue(parseFloat(newValue));
+        }
+    };
+
     const handleLoanAmountChange = (newValue: string | undefined) => {
         if (newValue === undefined) {
             return;
@@ -96,13 +109,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                 <TextField
                     label="House Price"
                     onChange={(_e, newValue) => {
-                        if (newValue === undefined) {
-                            return;
-                        } else if (isNaN(parseFloat(newValue))) {
-                            return;
-                        } else {
-                            setHouseValue(parseFloat(newValue));
-                        }
+                        handleHouseValueChange(newValue);
                     }}
                     prefix="€"
                     type="number"
