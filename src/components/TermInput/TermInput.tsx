@@ -1,41 +1,42 @@
-import { ITextFieldStyles, TextField } from "@fluentui/react";
+import { Input, Label, makeStyles } from "@fluentui/react-components";
+import React from "react";
 
 export interface TermInputProps {
     term: number;
     setTerm: (newValue: number) => void;
-    styles?: Partial<ITextFieldStyles>;
 }
 
-const defaultTextFieldStyles: Partial<ITextFieldStyles> = {
-    fieldGroup: { width: 200 },
-};
+const useStyles = makeStyles({
+    container: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+        alignItems: "center",
+    },
+    input: {
+        width: "200px",
+    },
+});
 
 export const TermInput: React.FC<TermInputProps> = (props: TermInputProps) => {
+    const styles = useStyles();
+    
     return (
-        <>
-            <TextField
-                label="Mortgage Term"
-                onChange={(_e, newValue) => {
-                    if (newValue === undefined) {
-                        return;
-                    }
-                    props.setTerm(parseFloat(newValue));
-                }}
-                styles={props.styles ?? defaultTextFieldStyles}
-                value={props.term.toString()}
+        <div className={styles.container}>
+            <Label htmlFor="term-input">Mortgage Term</Label>
+            <Input
+                id="term-input"
                 type="number"
-                suffix="years"
+                className={styles.input}
+                value={props.term.toString()}
+                onChange={(_e, data) => {
+                    const newValue = data.value;
+                    if (newValue && !isNaN(parseFloat(newValue))) {
+                        props.setTerm(parseFloat(newValue));
+                    }
+                }}
+                contentAfter="years"
             />
-
-            {/* <Slider
-                label="Test"
-                min={0}
-                max={35}
-                step={1}
-                value={props.term}
-                onChange={props.setTerm}
-                showValue
-            /> */}
-        </>
+        </div>
     );
 };

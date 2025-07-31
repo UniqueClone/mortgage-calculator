@@ -1,4 +1,5 @@
-import { Checkbox, ITextFieldStyles, TextField } from "@fluentui/react";
+import React from "react";
+import { Checkbox, Input, Label, makeStyles } from "@fluentui/react-components";
 
 export interface InterestRateProps {
     interestRate: number | undefined;
@@ -7,9 +8,28 @@ export interface InterestRateProps {
     setUseGlobalInterestRate: (newValue: boolean) => void;
 }
 
+const useStyles = makeStyles({
+    container: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+        alignItems: "center",
+    },
+    inputContainer: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+        alignItems: "center",
+    },
+    input: {
+        width: "200px",
+    },
+});
+
 export const InterestRate: React.FC<InterestRateProps> = (
     props: InterestRateProps
 ) => {
+    const styles = useStyles();
     const {
         interestRate,
         setInterestRate,
@@ -17,56 +37,47 @@ export const InterestRate: React.FC<InterestRateProps> = (
         setUseGlobalInterestRate,
     } = props;
 
-    const defaultTextFieldStyles: Partial<ITextFieldStyles> = {
-        fieldGroup: { width: 200 },
-    };
-
     const handleGlobalInterestRateChange = (checked: boolean) => {
         setUseGlobalInterestRate(checked);
-
-        // if (!checked) {
-        //     setInterestRate(undefined);
-        // }
     };
 
     return (
-        <>
+        <div className={styles.container}>
             <Checkbox
                 label="Use one interest rate?"
                 checked={useGlobalInterestRate}
-                onChange={(_e, checked) => {
-                    if (checked === undefined) {
-                        return;
-                    }
-                    handleGlobalInterestRateChange(checked);
+                onChange={(_e, data) => {
+                    handleGlobalInterestRateChange(data.checked === true);
                 }}
             />
 
             {useGlobalInterestRate && (
-                <TextField
-                    type="number"
-                    label="Interest Rate"
-                    styles={defaultTextFieldStyles}
-                    value={interestRate?.toString()}
-                    onChange={(_e, newValue) => {
-                        if (newValue === undefined) {
-                            return;
-                        } else if (newValue === "") {
-                            setInterestRate(0);
-                        } else if (isNaN(parseFloat(newValue))) {
-                            return;
-                        } else if (
-                            parseFloat(newValue) <= 0 ||
-                            parseFloat(newValue) > 100
-                        ) {
-                            setInterestRate(0);
-                        } else {
-                            setInterestRate(parseFloat(newValue));
-                        }
-                    }}
-                    suffix="%"
-                />
+                <div className={styles.inputContainer}>
+                    <Label htmlFor="interest-rate-input">Interest Rate</Label>
+                    <Input
+                        id="interest-rate-input"
+                        type="number"
+                        className={styles.input}
+                        value={interestRate?.toString() || ""}
+                        onChange={(_e, data) => {
+                            const newValue = data.value;
+                            if (newValue === "") {
+                                setInterestRate(0);
+                            } else if (isNaN(parseFloat(newValue))) {
+                                return;
+                            } else if (
+                                parseFloat(newValue) <= 0 ||
+                                parseFloat(newValue) > 100
+                            ) {
+                                setInterestRate(0);
+                            } else {
+                                setInterestRate(parseFloat(newValue));
+                            }
+                        }}
+                        contentAfter="%"
+                    />
+                </div>
             )}
-        </>
+        </div>
     );
 };

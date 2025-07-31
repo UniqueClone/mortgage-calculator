@@ -1,11 +1,13 @@
 import {
     Checkbox,
-    Icon,
+    Button,
     Link,
-    PrimaryButton,
-    Stack,
     Text,
-} from "@fluentui/react";
+    makeStyles,
+    tokens,
+    Divider,
+} from "@fluentui/react-components";
+import { DrinkCoffeeRegular } from "@fluentui/react-icons";
 import React, { useEffect } from "react";
 import { InterestRate } from "../InterestRate/InterestRate";
 import { MaxLoanInput } from "../MaxLoanInput/MaxLoanInput";
@@ -17,7 +19,29 @@ import { FeesPanel } from "../FeesPanel/FeesPanel";
 
 export interface MortgageComparisonProps {}
 
+const useStyles = makeStyles({
+    container: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: tokens.spacingVerticalXXL,
+        padding: tokens.spacingVerticalXL,
+    },
+    comparisonContainer: {
+        display: "flex",
+        flexWrap: "wrap",
+        gap: tokens.spacingHorizontalXXXL,
+        justifyContent: "center",
+    },
+    disclaimer: {
+        width: "80%",
+        textAlign: "center",
+    },
+});
+
 export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
+    const styles = useStyles();
+
     const savedMortgageDetails = localStorage.getItem("mortgageDetails");
     const parsedMortgageDetails = JSON.parse(savedMortgageDetails ?? "{}");
 
@@ -50,12 +74,6 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
 
     const [isPanelOpen, setIsPanelOpen] = React.useState(false);
 
-    const containerStackStyles = {
-        root: { alignItems: "center" },
-    };
-    const containerStackTokens = { childrenGap: 30 };
-    const comparisonStackTokens = { childrenGap: 40 };
-
     useEffect(() => {
         localStorage.setItem(
             "mortgageDetails",
@@ -70,36 +88,48 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
     }, [fees, interestRate, useGlobalInterestRate, maxLoan, term]);
 
     return (
-        <Stack styles={containerStackStyles} tokens={containerStackTokens}>
+        <div className={styles.container}>
             <h1>Mortgage Comparison</h1>
 
-            <Checkbox
-                label="First Time Buyer?"
-                checked={firstTimeBuyer}
-                onChange={(_e, checked) => {
-                    if (checked === undefined) {
-                        return;
-                    }
-                    setFirstTimeBuyer(checked);
-                }}
-            />
+            <span style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
+                alignItems: "center",
+            }}>
+                <Checkbox
+                    label="First Time Buyer?"
+                    checked={firstTimeBuyer}
+                    onChange={(_e, data) => {
+                        setFirstTimeBuyer(data.checked === true);
+                    }}
+                    style={{
+                        padding: 0,
+                    }}
+                />
 
-            <InterestRate
-                interestRate={interestRate}
-                setInterestRate={setInterestRate}
-                useGlobalInterestRate={useGlobalInterestRate}
-                setUseGlobalInterestRate={setUseGlobalInterestRate}
-            />
+                <InterestRate
+                    interestRate={interestRate}
+                    setInterestRate={setInterestRate}
+                    useGlobalInterestRate={useGlobalInterestRate}
+                    setUseGlobalInterestRate={setUseGlobalInterestRate}
+                />
+            </span>
 
             <MaxLoanInput maxLoan={maxLoan} setMaxLoan={setMaxLoan} />
 
             <TermInput term={term} setTerm={setTerm} />
 
-            <PrimaryButton onClick={() => setIsPanelOpen(true)}>
+            <Button
+                appearance="primary"
+                onClick={() => setIsPanelOpen(true)}
+            >
                 View/Edit Fees
-            </PrimaryButton>
+            </Button>
 
-            <Stack horizontal tokens={comparisonStackTokens} wrap>
+            <Divider />
+
+            <div className={styles.comparisonContainer}>
                 <MortgageOption
                     fees={fees}
                     firstTimeBuyer={firstTimeBuyer}
@@ -129,37 +159,29 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
                     maxLoan={maxLoan}
                     term={term}
                 />
-            </Stack>
+            </div>
 
             <br />
 
-            <Text variant="medium" style={{ width: "70%" }}>
+            <Text className={styles.disclaimer} size={400}>
                 <strong>Disclaimer:</strong> This is a simple mortgage
                 comparison tool that calculates monthly payments based on the
-                interest rate, loan amount, and term. The numbers are all
-                estimates based on my own experience and research. Always
+                interest rate, loan amount, and term. The numbers are all estimates based on my own experience and research. Always
                 consult with a financial advisor before making any decisions.
             </Text>
 
-            <Text variant="medium">
+            <Text size={400}>
                 If you found this useful, consider{" "}
                 <Link
                     href="https://www.buymeacoffee.com/ryanlynch"
                     style={{ color: "rgb(33, 171, 56)" }}
                     target="_blank"
-                    // onClick={() => {
-                    //   appInsights.trackEvent({
-                    //     name: "LinkClick",
-                    //     properties: {
-                    //       href: "https://www.buymeacoffee.com/ryanlynch",
-                    //     },
-                    // });
-                    // }}
                 >
-                    buying me a coffee! <Icon iconName="CoffeeScript" />{" "}
+                    buying me a coffee! <DrinkCoffeeRegular />{" "}
                 </Link>
             </Text>
-            <Text variant="medium">
+
+            <Text size={400}>
                 If you have any feedback or suggestions, please{" "}
                 <Link
                     href="mailto:ryanjetbox@gmail.com"
@@ -186,7 +208,7 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
                 isPanelOpen={isPanelOpen}
                 setIsPanelOpen={setIsPanelOpen}
             />
-        </Stack>
+        </div>
     );
 };
 
@@ -200,9 +222,22 @@ interface MortgageOptionProps {
     term: number;
 }
 
+const useMortgageOptionStyles = makeStyles({
+    optionContainer: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        flexGrow: 1,
+        border: `1px solid ${tokens.colorNeutralStroke2}`,
+        borderRadius: tokens.borderRadiusMedium,
+        padding: tokens.spacingVerticalM,
+    },
+});
+
 const MortgageOption: React.FC<MortgageOptionProps> = (
     props: MortgageOptionProps
 ) => {
+    const styles = useMortgageOptionStyles();
     const {
         fees,
         firstTimeBuyer,
@@ -214,21 +249,19 @@ const MortgageOption: React.FC<MortgageOptionProps> = (
     } = props;
 
     return (
-        <Stack.Item grow>
-            <Stack horizontalAlign="center">
-                <h2>Option {id}</h2>
+        <div className={styles.optionContainer}>
+            <h2>Option {id}</h2>
 
-                <MortgageDetails
-                    id={id}
-                    fees={fees}
-                    firstTimeBuyer={firstTimeBuyer}
-                    interestRate={
-                        useGlobalInterestRate ? interestRate : undefined
-                    }
-                    maxLoan={maxLoan}
-                    term={term}
-                />
-            </Stack>
-        </Stack.Item>
+            <MortgageDetails
+                id={id}
+                fees={fees}
+                firstTimeBuyer={firstTimeBuyer}
+                interestRate={
+                    useGlobalInterestRate ? interestRate : undefined
+                }
+                maxLoan={maxLoan}
+                term={term}
+            />
+        </div>
     );
 };
