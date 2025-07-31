@@ -12,7 +12,8 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@fluentui/react": "^8.118.7",
+    "@fluentui/react-components": "^9.54.17",
+    "@fluentui/react-icons": "^2.0.258",
     "@microsoft/applicationinsights-react-js": "^17.3.3",
     "@microsoft/applicationinsights-web": "^3.3.3",
     "applicationinsights": "^3.3.0",

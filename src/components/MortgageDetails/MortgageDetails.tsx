@@ -1,11 +1,14 @@
 import {
-    Icon,
-    PrimaryButton,
-    Stack,
+    Button,
+    Divider,
+    Input,
+    Label,
     Text,
-    TextField,
-    TooltipHost,
-} from "@fluentui/react";
+    Tooltip,
+    makeStyles,
+    tokens,
+} from "@fluentui/react-components";
+import { InfoRegular } from "@fluentui/react-icons";
 import React, { useEffect } from "react";
 import {
     MortgageFees,
@@ -24,38 +27,64 @@ export interface MortgageDetailsProps {
     term: number;
 }
 
+const useStyles = makeStyles({
+    container: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: tokens.spacingVerticalL,
+        minWidth: "300px",
+    },
+    inputContainer: {
+        padding: tokens.spacingVerticalM,
+        display: "flex",
+        flexDirection: "column",
+        gap: tokens.spacingVerticalS,
+        alignItems: "center",
+        width: "100%",
+    },
+    input: {
+        width: "200px",
+    },
+    buttonContainer: {
+        paddingTop: tokens.spacingVerticalM,
+        paddingLeft: "26px",
+        display: "flex",
+        alignItems: "center",
+    },
+    savingsContainer: {
+        display: "flex",
+        alignItems: "center",
+        paddingLeft: tokens.spacingHorizontalXXL,
+    },
+    monthlyPaymentContainer: {
+        display: "flex",
+        alignItems: "center",
+    },
+    highlightText: {
+        color: "lightgreen",
+    },
+    tooltipContent: {
+        display: "flex",
+        flexDirection: "column",
+        gap: tokens.spacingVerticalS,
+        alignItems: "flex-end",
+    },
+});
+
 export const MortgageDetails: React.FC<MortgageDetailsProps> = (
     props: MortgageDetailsProps
 ) => {
+    const styles = useStyles();
     const { id, fees, firstTimeBuyer, interestRate, maxLoan, term } = props;
 
     const [deposit, setDeposit] = React.useState<number>(0);
-    const [setLoanTooltipVisible, setSetLoanTooltipVisible] = React.useState(false);
-    const [savingsTooltipVisible, setSavingsTooltipVisible] = React.useState(false);
 
     const updateDeposit = (newValue: number) => {
         if (newValue < 0) {
             setDeposit(0);
         } else {
             setDeposit(newValue);
-        }
-    };
-
-    const handleSetLoanKeyDown = (event: React.KeyboardEvent) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            setSetLoanTooltipVisible(!setLoanTooltipVisible);
-        } else if (event.key === 'Escape') {
-            setSetLoanTooltipVisible(false);
-        }
-    };
-
-    const handleSavingsKeyDown = (event: React.KeyboardEvent) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            setSavingsTooltipVisible(!savingsTooltipVisible);
-        } else if (event.key === 'Escape') {
-            setSavingsTooltipVisible(false);
         }
     };
 
@@ -75,15 +104,8 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
         localStorageData ? JSON.parse(localStorageData).loanAmount : 0
     );
 
-    const containerStackStyles = {
-        root: { alignItems: "center" },
-    };
-    const containerStackTokens = { childrenGap: 30 };
-
-    const handleHouseValueChange = (newValue: string | undefined) => {
-        if (newValue === undefined) {
-            return;
-        } else if (newValue === "") {
+    const handleHouseValueChange = (newValue: string) => {
+        if (newValue === "") {
             setHouseValue(0);
             return;
         } else if (isNaN(parseFloat(newValue))) {
@@ -93,10 +115,8 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
         }
     };
 
-    const handleLoanAmountChange = (newValue: string | undefined) => {
-        if (newValue === undefined) {
-            return;
-        } else if (newValue === "") {
+    const handleLoanAmountChange = (newValue: string) => {
+        if (newValue === "") {
             setLoanAmount(0);
             return;
         } else if (isNaN(parseFloat(newValue))) {
@@ -124,65 +144,57 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
     }, [houseValue, loanAmount]);
 
     return (
-        <Stack styles={containerStackStyles} tokens={containerStackTokens}>
-            <Stack.Item grow>
-                <TextField
-                    label="House Price"
-                    onChange={(_e, newValue) => {
-                        handleHouseValueChange(newValue);
-                    }}
-                    prefix="€"
+        <div className={styles.container}>
+            <div className={styles.inputContainer}>
+                <Label htmlFor={`house-price-${id}`}>House Price</Label>
+                <Input
+                    id={`house-price-${id}`}
                     type="number"
+                    className={styles.input}
                     value={houseValue.toString()}
+                    onChange={(_e, data) => handleHouseValueChange(data.value)}
+                    contentBefore="€"
                 />
-            </Stack.Item>
+            </div>
 
             {interestRate === undefined && (
-                <Stack.Item grow>
-                    <TextField
-                        label="Interest Rate"
-                        onChange={(_e, newValue) => {
+                <div className={styles.inputContainer}>
+                    <Label htmlFor={`interest-rate-${id}`}>Interest Rate</Label>
+                    <Input
+                        id={`interest-rate-${id}`}
+                        type="number"
+                        className={styles.input}
+                        value={localInterestRate?.toString() || ""}
+                        onChange={(_e, data) => {
+                            const value = data.value;
                             setLocalInterestRate(
-                                newValue === undefined
-                                    ? 0
-                                    : parseFloat(newValue)
+                                value === "" ? 0 : parseFloat(value)
                             );
                         }}
-                        suffix="%"
-                        type="number"
-                        value={localInterestRate?.toString()}
+                        contentAfter="%"
                     />
-                </Stack.Item>
+                </div>
             )}
 
-            <Stack.Item grow>
-                <TextField
-                    label="Loan Amount"
-                    onChange={(_e, newValue) => {
-                        handleLoanAmountChange(newValue);
-                    }}
-                    prefix="€"
+            <div className={styles.inputContainer}>
+                <Label htmlFor={`loan-amount-${id}`}>Loan Amount</Label>
+                <Input
+                    id={`loan-amount-${id}`}
                     type="number"
+                    className={styles.input}
                     value={loanAmount.toString()}
+                    onChange={(_e, data) => handleLoanAmountChange(data.value)}
+                    contentBefore="€"
                 />
-            </Stack.Item>
+            </div>
 
-            <Stack.Item
-                grow
-                style={{
-                    margin: "0.5rem 0 0 0",
-                }}
-            >
-                <Text variant="xxLarge">OR</Text>
-            </Stack.Item>
+            <Text size={400} weight="semibold">
+                OR
+            </Text>
 
-            <Stack.Item
-                grow
-                style={{
-                    margin: "0.5rem 0 0 0",
-                }}
-            >
-                <PrimaryButton
+            <div className={styles.buttonContainer}>
+                <Button
+                    appearance="primary"
                     onClick={() =>
                         setLoanAmountToMax(
                             firstTimeBuyer,
@@ -193,100 +205,58 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                     }
                 >
                     Set loan to max
-                </PrimaryButton>{" "}
-                <TooltipHost
-                    className="tooltip"
+                </Button>
+                <Tooltip
                     content="This is 90% of the house value for a first time buyer (80% otherwise), unless you have set a maximum loan amount above that is less than 90% (or 80%) of the house value. In that case, the maximum loan amount will be used."
-                    directionalHint={5}
-                    calloutProps={{
-                        isBeakVisible: true,
-                    }}
+                    relationship="description"
                 >
-                    <Icon
-                        iconName="Info"
-                        style={{
-                            fontSize: "0.85rem",
-                            color: "lightgreen",
-                        }}
-                        tabIndex={0}
-                        role="button"
+                    <Button
+                        appearance="transparent"
+                        icon={<InfoRegular className={styles.highlightText} />}
                         aria-label="More information about setting loan to max"
-                        onKeyDown={handleSetLoanKeyDown}
                     />
-                </TooltipHost>
-            </Stack.Item>
+                </Tooltip>
+            </div>
 
-            <Stack.Item grow>
-                <Text variant="xxLarge">Savings Required: </Text>
-            </Stack.Item>
+            <Divider
+                style={{
+                    marginTop: tokens.spacingVerticalXL,
+                }}
+            />
 
-            <Stack.Item grow aria-live="polite">
-                <TooltipHost
-                    className="tooltip"
-                    tooltipProps={{
-                        onRenderContent: () => (
-                            <Stack
-                                tokens={{ childrenGap: 10 }}
-                                horizontalAlign="end"
-                            >
-                                <Text variant="medium">
-                                    Deposit: {formatter.format(deposit)}
-                                </Text>
-                                <Text variant="medium">
-                                    Fees:{" "}
-                                    {formatter.format(
-                                        savingsRequired(0, 0, fees)
-                                    )}
-                                </Text>
-                                <Text variant="medium">
-                                    Stamp Duty:{" "}
-                                    {formatter.format(houseValue * 0.01)}
-                                </Text>
-                            </Stack>
-                        ),
-                    }}
-                    calloutProps={{
-                        isBeakVisible: true,
-                    }}
-                >
-                    <Text
-                        aria-label={`Savings Required: ${formatter.format(savingsRequired(houseValue, deposit, fees))}`}
-                        variant="xLarge"
-                        style={{ color: "lightgreen" }}
-                    >
-                        {formatter.format(
-                            savingsRequired(houseValue, deposit, fees)
-                        )}{" "}
-                    </Text>
-                    <Icon
-                        iconName="Info"
-                        style={{ fontSize: "0.85rem", color: "lightgreen" }}
-                        tabIndex={0}
-                        role="button"
-                        aria-label="More information about savings required breakdown"
-                        onKeyDown={handleSavingsKeyDown}
-                    />
-                </TooltipHost>
-            </Stack.Item>
+            <Text size={500} as="h3">Savings Required</Text>
 
-            <Stack.Item grow>
-                <Text id="monthly-payment" variant="xxLarge">
-                    Monthly Payment:{" "}
+            <div className={styles.savingsContainer}>
+                <Text size={500} className={styles.highlightText}>
+                    {formatter.format(savingsRequired(houseValue, deposit, fees))}
                 </Text>
-            </Stack.Item>
 
-            <Stack.Item aria-live="polite" grow>
-                <Text
-                    aria-label={`Monthly Payment: ${formatter.format(
-                        getMonthlyPayment(
-                            loanAmount,
-                            interestRate ?? localInterestRate,
-                            term
-                        )
-                    )}`}
-                    variant="xLarge"
-                    style={{ color: "lightgreen" }}
+                <Tooltip
+                    content={
+                        <div className={styles.tooltipContent}>
+                            <Text>Deposit: {formatter.format(deposit)}</Text>
+                            <Text>
+                                Fees: {formatter.format(savingsRequired(0, 0, fees))}
+                            </Text>
+                            <Text>
+                                Stamp Duty: {formatter.format(houseValue * 0.01)}
+                            </Text>
+                        </div>
+                    }
+                    relationship="description"
                 >
+                    <Button
+                        appearance="transparent"
+                        icon={<InfoRegular className={styles.highlightText} />}
+                        aria-label="More information about savings required breakdown"
+                    />
+                </Tooltip>
+            </div>
+
+            <Text size={500} as="h3">Monthly Payment</Text>
+
+            <div className={styles.monthlyPaymentContainer}>
+                <Text size={500} className={styles.highlightText}>
                     {formatter.format(
                         getMonthlyPayment(
                             loanAmount,
@@ -295,7 +265,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                         )
                     )}
                 </Text>
-            </Stack.Item>
-        </Stack>
+            </div>
+        </div>
     );
 };
