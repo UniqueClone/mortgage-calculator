@@ -4,6 +4,7 @@ import {
     TextField,
     TooltipHost,
 } from "@fluentui/react";
+import React from "react";
 
 export interface MaxLoanInputProps {
     maxLoan: number;
@@ -19,6 +20,17 @@ export const MaxLoanInput: React.FC<MaxLoanInputProps> = (
         fieldGroup: { width: 200 },
     };
 
+    const [tooltipVisible, setTooltipVisible] = React.useState(false);
+
+    const handleKeyDown = (event: React.KeyboardEvent) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            setTooltipVisible(!tooltipVisible);
+        } else if (event.key === 'Escape') {
+            setTooltipVisible(false);
+        }
+    };
+
     return (
         <TextField
             type="number"
@@ -31,6 +43,10 @@ export const MaxLoanInput: React.FC<MaxLoanInputProps> = (
                             content="If you have your mortgage approval, you can put the max loan amount here. 
                             Note: This is not the house value, it is the house value minus your deposit."
                             id="maxLoanTooltip"
+                            calloutProps={{
+                                isBeakVisible: true,
+                                directionalHint: 5,
+                            }}
                         >
                             <Icon
                                 iconName="Info"
@@ -38,6 +54,11 @@ export const MaxLoanInput: React.FC<MaxLoanInputProps> = (
                                     fontSize: "0.85rem",
                                     color: "lightgreen",
                                 }}
+                                tabIndex={0}
+                                role="button"
+                                aria-label="More information about max loan amount"
+                                aria-describedby="maxLoanTooltip"
+                                onKeyDown={handleKeyDown}
                             />
                         </TooltipHost>
                     </div>
