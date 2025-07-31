@@ -30,12 +30,32 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
     const { id, fees, firstTimeBuyer, interestRate, maxLoan, term } = props;
 
     const [deposit, setDeposit] = React.useState<number>(0);
+    const [setLoanTooltipVisible, setSetLoanTooltipVisible] = React.useState(false);
+    const [savingsTooltipVisible, setSavingsTooltipVisible] = React.useState(false);
 
     const updateDeposit = (newValue: number) => {
         if (newValue < 0) {
             setDeposit(0);
         } else {
             setDeposit(newValue);
+        }
+    };
+
+    const handleSetLoanKeyDown = (event: React.KeyboardEvent) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            setSetLoanTooltipVisible(!setLoanTooltipVisible);
+        } else if (event.key === 'Escape') {
+            setSetLoanTooltipVisible(false);
+        }
+    };
+
+    const handleSavingsKeyDown = (event: React.KeyboardEvent) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            setSavingsTooltipVisible(!savingsTooltipVisible);
+        } else if (event.key === 'Escape') {
+            setSavingsTooltipVisible(false);
         }
     };
 
@@ -178,6 +198,9 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                     className="tooltip"
                     content="This is 90% of the house value for a first time buyer (80% otherwise), unless you have set a maximum loan amount above that is less than 90% (or 80%) of the house value. In that case, the maximum loan amount will be used."
                     directionalHint={5}
+                    calloutProps={{
+                        isBeakVisible: true,
+                    }}
                 >
                     <Icon
                         iconName="Info"
@@ -185,6 +208,10 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                             fontSize: "0.85rem",
                             color: "lightgreen",
                         }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="More information about setting loan to max"
+                        onKeyDown={handleSetLoanKeyDown}
                     />
                 </TooltipHost>
             </Stack.Item>
@@ -218,6 +245,9 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                             </Stack>
                         ),
                     }}
+                    calloutProps={{
+                        isBeakVisible: true,
+                    }}
                 >
                     <Text
                         aria-label={`Savings Required: ${formatter.format(savingsRequired(houseValue, deposit, fees))}`}
@@ -231,6 +261,10 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                     <Icon
                         iconName="Info"
                         style={{ fontSize: "0.85rem", color: "lightgreen" }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label="More information about savings required breakdown"
+                        onKeyDown={handleSavingsKeyDown}
                     />
                 </TooltipHost>
             </Stack.Item>
