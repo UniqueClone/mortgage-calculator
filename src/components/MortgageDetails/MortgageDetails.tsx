@@ -79,32 +79,12 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
     const { id, fees, firstTimeBuyer, interestRate, maxLoan, term } = props;
 
     const [deposit, setDeposit] = React.useState<number>(0);
-    const [setLoanTooltipVisible, setSetLoanTooltipVisible] = React.useState(false);
-    const [savingsTooltipVisible, setSavingsTooltipVisible] = React.useState(false);
 
     const updateDeposit = (newValue: number) => {
         if (newValue < 0) {
             setDeposit(0);
         } else {
             setDeposit(newValue);
-        }
-    };
-
-    const handleSetLoanKeyDown = (event: React.KeyboardEvent) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            setSetLoanTooltipVisible(!setLoanTooltipVisible);
-        } else if (event.key === 'Escape') {
-            setSetLoanTooltipVisible(false);
-        }
-    };
-
-    const handleSavingsKeyDown = (event: React.KeyboardEvent) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            setSavingsTooltipVisible(!savingsTooltipVisible);
-        } else if (event.key === 'Escape') {
-            setSavingsTooltipVisible(false);
         }
     };
 
