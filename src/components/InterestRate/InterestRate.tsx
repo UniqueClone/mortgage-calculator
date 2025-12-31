@@ -22,7 +22,8 @@ const useStyles = makeStyles({
         alignItems: "center",
     },
     input: {
-        width: "200px",
+        width: "220px",
+        maxWidth: "100%",
     },
 });
 
@@ -57,6 +58,8 @@ export const InterestRate: React.FC<InterestRateProps> = (
                     <Input
                         id="interest-rate-input"
                         type="number"
+                        min={0}
+                        max={100}
                         className={styles.input}
                         value={interestRate?.toString() || ""}
                         onChange={(_e, data) => {

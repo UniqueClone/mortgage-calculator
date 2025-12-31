@@ -44,7 +44,8 @@ const useStyles = makeStyles({
         width: "100%",
     },
     input: {
-        width: "200px",
+        width: "220px",
+        maxWidth: "100%",
     },
     buttonContainer: {
         paddingTop: tokens.spacingVerticalM,
@@ -62,7 +63,7 @@ const useStyles = makeStyles({
         alignItems: "center",
     },
     highlightText: {
-        color: "lightgreen",
+        color: tokens.colorBrandForeground1,
     },
     tooltipContent: {
         display: "flex",
@@ -150,6 +151,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                 <Input
                     id={`house-price-${id}`}
                     type="number"
+                    min={0}
                     className={styles.input}
                     value={houseValue.toString()}
                     onChange={(_e, data) => handleHouseValueChange(data.value)}
@@ -163,6 +165,8 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                     <Input
                         id={`interest-rate-${id}`}
                         type="number"
+                        min={0}
+                        max={100}
                         className={styles.input}
                         value={localInterestRate?.toString() || ""}
                         onChange={(_e, data) => {
@@ -181,6 +185,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                 <Input
                     id={`loan-amount-${id}`}
                     type="number"
+                    min={0}
                     className={styles.input}
                     value={loanAmount.toString()}
                     onChange={(_e, data) => handleLoanAmountChange(data.value)}
@@ -224,11 +229,20 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                 }}
             />
 
-            <Text size={500} as="h3">Savings Required</Text>
+            <Text size={400} as="h3">
+                Savings Required
+            </Text>
 
             <div className={styles.savingsContainer}>
-                <Text size={500} className={styles.highlightText}>
-                    {formatter.format(savingsRequired(houseValue, deposit, fees))}
+                <Text
+                    size={400}
+                    className={styles.highlightText}
+                    role="status"
+                    aria-live="polite"
+                >
+                    {formatter.format(
+                        savingsRequired(houseValue, deposit, fees)
+                    )}
                 </Text>
 
                 <Tooltip
@@ -236,10 +250,12 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                         <div className={styles.tooltipContent}>
                             <Text>Deposit: {formatter.format(deposit)}</Text>
                             <Text>
-                                Fees: {formatter.format(savingsRequired(0, 0, fees))}
+                                Fees:{" "}
+                                {formatter.format(savingsRequired(0, 0, fees))}
                             </Text>
                             <Text>
-                                Stamp Duty: {formatter.format(houseValue * 0.01)}
+                                Stamp Duty:{" "}
+                                {formatter.format(houseValue * 0.01)}
                             </Text>
                         </div>
                     }
@@ -253,10 +269,17 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                 </Tooltip>
             </div>
 
-            <Text size={500} as="h3">Monthly Payment</Text>
+            <Text size={400} as="h3">
+                Monthly Payment
+            </Text>
 
             <div className={styles.monthlyPaymentContainer}>
-                <Text size={500} className={styles.highlightText}>
+                <Text
+                    size={400}
+                    className={styles.highlightText}
+                    role="status"
+                    aria-live="polite"
+                >
                     {formatter.format(
                         getMonthlyPayment(
                             loanAmount,

@@ -74,9 +74,9 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
             <DrawerBody>
                 <div className={styles.drawerContent}>
                     <Text>
-                        These are the fees associated with taking out a mortgage on
-                        a property. They are estimates and can vary depending on the
-                        lender and the property.
+                        These are the fees associated with taking out a mortgage
+                        on a property. They are estimates and can vary depending
+                        on the lender and the property.
                     </Text>
 
                     <div className={styles.inputContainer}>
@@ -84,6 +84,7 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                         <Input
                             id="valuation-fee"
                             type="number"
+                            min={0}
                             className={styles.input}
                             value={fees.valuationFee?.toString() || ""}
                             onChange={(_, data) =>
@@ -101,6 +102,7 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                         <Input
                             id="survey-fee"
                             type="number"
+                            min={0}
                             className={styles.input}
                             value={fees.surveyFee?.toString() || ""}
                             onChange={(_, data) =>
@@ -118,9 +120,9 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                     </h2>
 
                     <Text>
-                        An outlay is money spent by the solicitor on your behalf in
-                        the conveyancing process e.g. land registry fees. Your legal
-                        fees are your solicitor fees.
+                        An outlay is money spent by the solicitor on your behalf
+                        in the conveyancing process e.g. land registry fees.
+                        Your legal fees are your solicitor fees.
                     </Text>
 
                     <div className={styles.inputContainer}>
@@ -128,6 +130,7 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                         <Input
                             id="legal-fee"
                             type="number"
+                            min={0}
                             className={styles.input}
                             value={fees.legalFee?.toString() || ""}
                             onChange={(_, data) =>
@@ -145,6 +148,7 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                         <Input
                             id="search-fee"
                             type="number"
+                            min={0}
                             className={styles.input}
                             value={fees.searchFee?.toString() || ""}
                             onChange={(_, data) =>
@@ -158,16 +162,20 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                     </div>
 
                     <div className={styles.inputContainer}>
-                        <Label htmlFor="register-deeds-fee">Register of Deeds Fee</Label>
+                        <Label htmlFor="register-deeds-fee">
+                            Register of Deeds Fee
+                        </Label>
                         <Input
                             id="register-deeds-fee"
                             type="number"
+                            min={0}
                             className={styles.input}
                             value={fees.registerOfDeedsFee?.toString() || ""}
                             onChange={(_, data) =>
                                 setFees({
                                     ...fees,
-                                    registerOfDeedsFee: parseFloat(data.value) || 0,
+                                    registerOfDeedsFee:
+                                        parseFloat(data.value) || 0,
                                 })
                             }
                             contentBefore="€"
@@ -175,22 +183,25 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                     </div>
 
                     <div className={styles.inputContainer}>
-                        <Label htmlFor="land-registry-fee">Land Registry Fee</Label>
+                        <Label htmlFor="land-registry-fee">
+                            Land Registry Fee
+                        </Label>
                         <Input
                             id="land-registry-fee"
                             type="number"
+                            min={0}
                             className={styles.input}
                             value={fees.landRegistryFee?.toString() || ""}
                             onChange={(_, data) =>
                                 setFees({
                                     ...fees,
-                                    landRegistryFee: parseFloat(data.value) || 0,
+                                    landRegistryFee:
+                                        parseFloat(data.value) || 0,
                                 })
                             }
                             contentBefore="€"
                         />
                     </div>
-
                 </div>
             </DrawerBody>
 

@@ -15,7 +15,6 @@ import { TermInput } from "../TermInput/TermInput";
 import { MortgageDetails } from "../MortgageDetails/MortgageDetails";
 import { MortgageFees } from "../MortgageDetails/MortgageDetails.mapper";
 import { FeesPanel } from "../FeesPanel/FeesPanel";
-// import { appInsights } from "../../App";
 
 export interface MortgageComparisonProps {}
 
@@ -91,12 +90,14 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
         <div className={styles.container}>
             <h1>Mortgage Comparison</h1>
 
-            <span style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "8px",
-                alignItems: "center",
-            }}>
+            <span
+                style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                    alignItems: "center",
+                }}
+            >
                 <Checkbox
                     label="First Time Buyer?"
                     checked={firstTimeBuyer}
@@ -120,16 +121,17 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
 
             <TermInput term={term} setTerm={setTerm} />
 
-            <Button
-                appearance="primary"
-                onClick={() => setIsPanelOpen(true)}
-            >
+            <Button appearance="primary" onClick={() => setIsPanelOpen(true)}>
                 View/Edit Fees
             </Button>
 
             <Divider />
 
-            <div className={styles.comparisonContainer}>
+            <div
+                className={styles.comparisonContainer}
+                role="list"
+                aria-label="Mortgage options"
+            >
                 <MortgageOption
                     fees={fees}
                     firstTimeBuyer={firstTimeBuyer}
@@ -166,7 +168,8 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
             <Text className={styles.disclaimer} size={400}>
                 <strong>Disclaimer:</strong> This is a simple mortgage
                 comparison tool that calculates monthly payments based on the
-                interest rate, loan amount, and term. The numbers are all estimates based on my own experience and research. Always
+                interest rate, loan amount, and term. The numbers are all
+                estimates based on my own experience and research. Always
                 consult with a financial advisor before making any decisions.
             </Text>
 
@@ -228,9 +231,13 @@ const useMortgageOptionStyles = makeStyles({
         flexDirection: "column",
         alignItems: "center",
         flexGrow: 1,
-        border: `1px solid ${tokens.colorNeutralStroke2}`,
-        borderRadius: tokens.borderRadiusMedium,
-        padding: tokens.spacingVerticalM,
+        borderRadius: tokens.borderRadiusLarge,
+        padding: tokens.spacingVerticalL,
+        paddingInline: tokens.spacingHorizontalXL,
+        border: `1px solid ${tokens.colorBrandStroke1}`,
+        background: `radial-gradient(circle at top left, ${tokens.colorBrandBackground2}, transparent 60%), ${tokens.colorNeutralBackground2}`,
+        boxShadow: tokens.shadow16,
+        minWidth: "280px",
     },
 });
 
@@ -249,16 +256,20 @@ const MortgageOption: React.FC<MortgageOptionProps> = (
     } = props;
 
     return (
-        <div className={styles.optionContainer}>
-            <h2>Option {id}</h2>
+        <div
+            className={styles.optionContainer}
+            role="listitem"
+            aria-label={`Mortgage option ${id}`}
+        >
+            <Text as="h2" size={400} weight="semibold">
+                Option {id}
+            </Text>
 
             <MortgageDetails
                 id={id}
                 fees={fees}
                 firstTimeBuyer={firstTimeBuyer}
-                interestRate={
-                    useGlobalInterestRate ? interestRate : undefined
-                }
+                interestRate={useGlobalInterestRate ? interestRate : undefined}
                 maxLoan={maxLoan}
                 term={term}
             />

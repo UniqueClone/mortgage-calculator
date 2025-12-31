@@ -14,19 +14,21 @@ const useStyles = makeStyles({
         alignItems: "center",
     },
     input: {
-        width: "200px",
+        width: "220px",
+        maxWidth: "100%",
     },
 });
 
 export const TermInput: React.FC<TermInputProps> = (props: TermInputProps) => {
     const styles = useStyles();
-    
+
     return (
         <div className={styles.container}>
             <Label htmlFor="term-input">Mortgage Term</Label>
             <Input
                 id="term-input"
                 type="number"
+                min={1}
                 className={styles.input}
                 value={props.term.toString()}
                 onChange={(_e, data) => {

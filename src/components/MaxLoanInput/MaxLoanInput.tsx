@@ -24,10 +24,11 @@ const useStyles = makeStyles({
         alignItems: "center",
     },
     input: {
-        width: "200px",
+        width: "220px",
+        maxWidth: "100%",
     },
     infoIcon: {
-        color: "lightgreen",
+        color: "rgb(33, 171, 56)",
         cursor: "pointer",
     },
     tooltipButton: {
@@ -63,6 +64,7 @@ export const MaxLoanInput: React.FC<MaxLoanInputProps> = (
             <Input
                 id="max-loan-input"
                 type="number"
+                min={0}
                 className={styles.input}
                 value={maxLoan.toString()}
                 onChange={(_e, data) => {
