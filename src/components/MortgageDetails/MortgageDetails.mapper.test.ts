@@ -5,6 +5,7 @@ import {
     calculateOption,
     getMonthlyPayment,
     helpToBuy,
+    lowestPositive,
     maxLoanAmount,
     savingsRequired,
     stampDuty,
@@ -245,5 +246,21 @@ describe("calculateOption", () => {
             { ...settings, ...limits }
         );
         expect(result.loanWarning).toBe(warning);
+    });
+});
+
+describe("lowestPositive", () => {
+    it("finds the lowest filled-in value", () => {
+        expect(lowestPositive([1_600, 1_500, 0])).toEqual(new Set([1]));
+    });
+
+    it("marks ties", () => {
+        expect(lowestPositive([1_500, 1_600, 1_500])).toEqual(
+            new Set([0, 2])
+        );
+    });
+
+    it("needs at least two values to compare", () => {
+        expect(lowestPositive([1_500, 0, 0])).toEqual(new Set());
     });
 });

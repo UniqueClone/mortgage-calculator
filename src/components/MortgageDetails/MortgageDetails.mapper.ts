@@ -291,3 +291,17 @@ export const calculateOption = (
         }),
     };
 };
+
+// Indices of the lowest positive values, or none when fewer than two values
+// are filled in (there's nothing to compare yet).
+export const lowestPositive = (values: number[]): Set<number> => {
+    const positive = values.filter((value) => value > 0);
+    if (positive.length < 2) {
+        return new Set();
+    }
+
+    const lowest = Math.min(...positive);
+    return new Set(
+        values.flatMap((value, index) => (value === lowest ? [index] : []))
+    );
+};

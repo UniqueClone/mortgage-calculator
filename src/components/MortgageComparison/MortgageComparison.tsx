@@ -7,7 +7,8 @@ import {
     makeStyles,
     tokens,
 } from "@fluentui/react-components";
-import React, { useEffect } from "react";
+import { Add20Regular, Dismiss20Regular } from "@fluentui/react-icons";
+import React, { useEffect, useRef } from "react";
 import { InterestRate } from "../InterestRate/InterestRate";
 import { MaxLoanInput } from "../MaxLoanInput/MaxLoanInput";
 import { TermInput } from "../TermInput/TermInput";
@@ -16,6 +17,7 @@ import {
     OptionResult,
     calculateOption,
     loanToIncomeLimit,
+    lowestPositive,
 } from "../MortgageDetails/MortgageDetails.mapper";
 import { NumberInput } from "../NumberInput/NumberInput";
 import { FeesPanel } from "../FeesPanel/FeesPanel";
@@ -24,6 +26,7 @@ import {
     MortgageSettings,
     browserStorage,
     loadState,
+    newOption,
     saveState,
 } from "../../storage";
 
@@ -55,6 +58,16 @@ const useStyles = makeStyles({
     },
     subtitle: {
         color: tokens.colorNeutralForeground3,
+    },
+    sectionHeader: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: tokens.spacingHorizontalM,
+        marginBottom: tokens.spacingVerticalM,
+        "& h2": {
+            marginBottom: 0,
+        },
     },
     sectionHeading: {
         margin: `0 0 ${tokens.spacingVerticalM}`,
@@ -137,13 +150,53 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
             ),
         );
 
+    // Move focus somewhere sensible after adding or removing an option, since
+    // the button that was pressed may no longer exist.
+    const addButtonRef = useRef<HTMLButtonElement>(null);
+    const optionsListRef = useRef<HTMLDivElement>(null);
+    const [focusTarget, setFocusTarget] = React.useState<number | "add">();
+
+    useEffect(() => {
+        if (focusTarget === "add") {
+            addButtonRef.current?.focus();
+        } else if (focusTarget !== undefined) {
+            optionsListRef.current
+                ?.querySelector<HTMLInputElement>(
+                    `[data-option-id="${focusTarget}"] input`,
+                )
+                ?.focus();
+        }
+        setFocusTarget(undefined);
+    }, [focusTarget]);
+
+    const addOption = () => {
+        const id = Math.max(0, ...options.map((option) => option.id)) + 1;
+        setOptions([...options, newOption(id, interestRate)]);
+        setFocusTarget(id);
+    };
+
+    const removeOption = (id: number) => {
+        setOptions(options.filter((option) => option.id !== id));
+        setFocusTarget("add");
+    };
+
+    const results = options.map((option) => calculateOption(option, settings));
+    const lowestMonthly = lowestPositive(
+        results.map((result) => result.monthlyPayment),
+    );
+    const lowestSavings = lowestPositive(
+        results.map((result) =>
+            result.monthlyPayment > 0 ? result.savings.total : 0,
+        ),
+    );
+
     return (
         <main className={styles.page}>
             <header className={styles.header}>
                 <h1 className={styles.title}>Mortgage comparison</h1>
                 <Text className={styles.subtitle}>
-                    Compare monthly repayments and upfront costs for up to three
-                    Irish mortgage scenarios.
+                    Compare monthly repayments and upfront costs for Irish
+                    mortgage scenarios side by side.
                 </Text>
             </header>
 
@@ -212,23 +265,42 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
             </section>
 
             <section aria-labelledby="options-heading">
-                <h2 id="options-heading" className={styles.sectionHeading}>
-                    Options
-                </h2>
+                <div className={styles.sectionHeader}>
+                    <h2 id="options-heading" className={styles.sectionHeading}>
+                        Options
+                    </h2>
+                    <Button
+                        ref={addButtonRef}
+                        icon={<Add20Regular />}
+                        onClick={addOption}
+                        disabled={options.length >= MAX_OPTIONS}
+                    >
+                        Add option
+                    </Button>
+                </div>
                 <div
+                    ref={optionsListRef}
                     className={styles.comparisonContainer}
                     role="list"
                     aria-label="Mortgage options"
                 >
-                    {options.map((option) => (
+                    {options.map((option, index) => (
                         <MortgageOption
                             key={option.id}
+                            title={`Option ${index + 1}`}
                             option={option}
                             onChange={(changes) =>
                                 updateOption(option.id, changes)
                             }
+                            onRemove={
+                                options.length > 1
+                                    ? () => removeOption(option.id)
+                                    : undefined
+                            }
                             settings={settings}
-                            result={calculateOption(option, settings)}
+                            result={results[index]}
+                            lowestMonthly={lowestMonthly.has(index)}
+                            lowestSavings={lowestSavings.has(index)}
                         />
                     ))}
                 </div>
@@ -267,11 +339,17 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
     );
 };
 
+const MAX_OPTIONS = 6;
+
 interface MortgageOptionProps {
+    title: string;
     option: MortgageOptionState;
     onChange: (changes: Partial<MortgageOptionState>) => void;
+    onRemove?: () => void;
     settings: MortgageSettings;
     result: OptionResult;
+    lowestMonthly: boolean;
+    lowestSavings: boolean;
 }
 
 const useMortgageOptionStyles = makeStyles({
@@ -284,6 +362,12 @@ const useMortgageOptionStyles = makeStyles({
         border: `1px solid ${tokens.colorNeutralStroke2}`,
         backgroundColor: tokens.colorNeutralBackground1,
     },
+    optionHeader: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        minHeight: "32px",
+    },
     optionTitle: {
         margin: 0,
         fontSize: tokens.fontSizeBase400,
@@ -295,21 +379,33 @@ const MortgageOption: React.FC<MortgageOptionProps> = (
     props: MortgageOptionProps,
 ) => {
     const styles = useMortgageOptionStyles();
-    const { option, onChange, settings, result } = props;
+    const { title, option, onChange, onRemove, ...detailsProps } = props;
 
     return (
         <div
             className={styles.optionContainer}
             role="listitem"
-            aria-label={`Mortgage option ${option.id}`}
+            aria-label={title}
+            data-option-id={option.id}
         >
-            <h3 className={styles.optionTitle}>Option {option.id}</h3>
+            <div className={styles.optionHeader}>
+                <h3 className={styles.optionTitle}>{title}</h3>
+                {onRemove && (
+                    <Button
+                        appearance="subtle"
+                        size="small"
+                        icon={<Dismiss20Regular />}
+                        aria-label={`Remove ${title}`}
+                        title={`Remove ${title}`}
+                        onClick={onRemove}
+                    />
+                )}
+            </div>
 
             <MortgageDetails
                 option={option}
                 onChange={onChange}
-                settings={settings}
-                result={result}
+                {...detailsProps}
             />
         </div>
     );

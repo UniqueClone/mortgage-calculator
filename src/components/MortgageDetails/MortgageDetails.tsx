@@ -1,4 +1,5 @@
 import {
+    Badge,
     Button,
     Checkbox,
     Field,
@@ -16,6 +17,8 @@ export interface MortgageDetailsProps {
     onChange: (changes: Partial<MortgageOptionState>) => void;
     settings: MortgageSettings;
     result: OptionResult;
+    lowestMonthly?: boolean;
+    lowestSavings?: boolean;
 }
 
 const useStyles = makeStyles({
@@ -55,6 +58,11 @@ const useStyles = makeStyles({
         display: "flex",
         flexDirection: "column",
     },
+    resultLabelRow: {
+        display: "flex",
+        alignItems: "center",
+        gap: tokens.spacingHorizontalS,
+    },
     resultLabel: {
         color: tokens.colorNeutralForeground3,
     },
@@ -86,7 +94,8 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
     props: MortgageDetailsProps,
 ) => {
     const styles = useStyles();
-    const { option, onChange, settings, result } = props;
+    const { option, onChange, settings, result, lowestMonthly, lowestSavings } =
+        props;
     const { housePrice, loanAmount } = option;
     const { loanWarning, savings } = result;
 
@@ -98,6 +107,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                         value={housePrice}
                         onChange={(value) => onChange({ housePrice: value })}
                         groupDigits
+                        zeroAsEmpty
                         contentBefore="€"
                     />
                 </Field>
@@ -125,6 +135,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                         value={loanAmount}
                         onChange={(value) => onChange({ loanAmount: value })}
                         groupDigits
+                        zeroAsEmpty
                         contentBefore="€"
                     />
                 </Field>
@@ -158,9 +169,12 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
 
             <div className={styles.results}>
                 <div className={styles.result}>
-                    <Text size={200} className={styles.resultLabel}>
-                        Monthly payment
-                    </Text>
+                    <div className={styles.resultLabelRow}>
+                        <Text size={200} className={styles.resultLabel}>
+                            Monthly payment
+                        </Text>
+                        {lowestMonthly && <LowestBadge />}
+                    </div>
                     <Text
                         size={600}
                         weight="semibold"
@@ -187,9 +201,12 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                 </div>
 
                 <div className={styles.result}>
-                    <Text size={200} className={styles.resultLabel}>
-                        Savings needed
-                    </Text>
+                    <div className={styles.resultLabelRow}>
+                        <Text size={200} className={styles.resultLabel}>
+                            Savings needed
+                        </Text>
+                        {lowestSavings && <LowestBadge />}
+                    </div>
                     <Text
                         size={400}
                         weight="semibold"
@@ -218,3 +235,9 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
         </div>
     );
 };
+
+const LowestBadge: React.FC = () => (
+    <Badge appearance="tint" color="brand" size="small">
+        Lowest
+    </Badge>
+);
