@@ -6,7 +6,7 @@ import {
     makeStyles,
     tokens,
 } from "@fluentui/react-components";
-import React, { useEffect } from "react";
+import React from "react";
 import {
     MortgageFees,
     formatter,
@@ -14,9 +14,11 @@ import {
     maxLoanAmount,
     savingsRequired,
 } from "./MortgageDetails.mapper";
+import { MortgageOptionState } from "../../storage";
 
 export interface MortgageDetailsProps {
-    id: number;
+    option: MortgageOptionState;
+    onChange: (changes: Partial<MortgageOptionState>) => void;
     fees: MortgageFees;
     firstTimeBuyer: boolean;
     interestRate: number | undefined;
@@ -82,63 +84,32 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
     props: MortgageDetailsProps
 ) => {
     const styles = useStyles();
-    const { id, fees, interestRate, maxLoan, term } = props;
+    const { option, onChange, fees, interestRate, maxLoan, term } = props;
+    const { housePrice, loanAmount } = option;
 
-    const localStorageData = localStorage.getItem("mortgageOption" + id);
-
-    const [localInterestRate, setLocalInterestRate] = React.useState<number>(
-        localStorageData
-            ? JSON.parse(localStorageData).interestRate
-            : interestRate ?? 4.0
-    );
-
-    const [houseValue, setHouseValue] = React.useState<number>(
-        localStorageData ? JSON.parse(localStorageData).houseValue : 0
-    );
-
-    const [loanAmount, setLoanAmount] = React.useState<number>(
-        localStorageData ? JSON.parse(localStorageData).loanAmount : 0
-    );
-
-    const handleHouseValueChange = (newValue: string) => {
+    const handleHousePriceChange = (newValue: string) => {
         if (newValue === "") {
-            setHouseValue(0);
-            return;
-        } else if (isNaN(parseFloat(newValue))) {
-            return;
-        } else {
-            setHouseValue(parseFloat(newValue));
+            onChange({ housePrice: 0 });
+        } else if (!isNaN(parseFloat(newValue))) {
+            onChange({ housePrice: parseFloat(newValue) });
         }
     };
 
     const handleLoanAmountChange = (newValue: string) => {
         if (newValue === "") {
-            setLoanAmount(0);
-            return;
-        } else if (isNaN(parseFloat(newValue))) {
-            return;
-        } else if (parseFloat(newValue) < 0) {
-            setLoanAmount(0);
-            return;
-        } else {
-            setLoanAmount(parseFloat(newValue));
+            onChange({ loanAmount: 0 });
+        } else if (!isNaN(parseFloat(newValue))) {
+            onChange({ loanAmount: Math.max(parseFloat(newValue), 0) });
         }
     };
 
-    useEffect(() => {
-        localStorage.setItem(
-            "mortgageOption" + id,
-            JSON.stringify({ houseValue, loanAmount, localInterestRate })
-        );
-    }, [houseValue, loanAmount, localInterestRate, id]);
-
-    const maxLoanForPrice = maxLoanAmount(houseValue, maxLoan);
-    const savings = savingsRequired(houseValue, loanAmount, fees);
+    const maxLoanForPrice = maxLoanAmount(housePrice, maxLoan);
+    const savings = savingsRequired(housePrice, loanAmount, fees);
 
     let loanWarning: string | undefined;
-    if (houseValue > 0 && loanAmount > houseValue) {
+    if (housePrice > 0 && loanAmount > housePrice) {
         loanWarning = "More than the house price.";
-    } else if (houseValue > 0 && loanAmount > maxLoanForPrice) {
+    } else if (housePrice > 0 && loanAmount > maxLoanForPrice) {
         loanWarning = `Above the maximum of ${formatter.format(
             maxLoanForPrice
         )}.`;
@@ -151,9 +122,9 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                     <Input
                         type="number"
                         min={0}
-                        value={houseValue.toString()}
+                        value={housePrice.toString()}
                         onChange={(_e, data) =>
-                            handleHouseValueChange(data.value)
+                            handleHousePriceChange(data.value)
                         }
                         contentBefore="€"
                     />
@@ -166,12 +137,12 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                             min={0}
                             max={100}
                             step={0.05}
-                            value={localInterestRate?.toString() || ""}
+                            value={option.interestRate.toString()}
                             onChange={(_e, data) => {
-                                const value = data.value;
-                                setLocalInterestRate(
-                                    value === "" ? 0 : parseFloat(value)
-                                );
+                                const value = parseFloat(data.value);
+                                onChange({
+                                    interestRate: isNaN(value) ? 0 : value,
+                                });
                             }}
                             contentAfter="%"
                         />
@@ -197,7 +168,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                 <Button
                     className={styles.maxButton}
                     size="small"
-                    onClick={() => setLoanAmount(maxLoanForPrice)}
+                    onClick={() => onChange({ loanAmount: maxLoanForPrice })}
                 >
                     Set loan to max
                 </Button>
@@ -218,7 +189,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                         {formatter.format(
                             getMonthlyPayment(
                                 loanAmount,
-                                interestRate ?? localInterestRate,
+                                interestRate ?? option.interestRate,
                                 term
                             )
                         )}

@@ -13,6 +13,13 @@ import { TermInput } from "../TermInput/TermInput";
 import { MortgageDetails } from "../MortgageDetails/MortgageDetails";
 import { MortgageFees } from "../MortgageDetails/MortgageDetails.mapper";
 import { FeesPanel } from "../FeesPanel/FeesPanel";
+import {
+    MortgageOptionState,
+    MortgageSettings,
+    browserStorage,
+    loadState,
+    saveState,
+} from "../../storage";
 
 export interface MortgageComparisonProps {}
 
@@ -82,50 +89,45 @@ const useStyles = makeStyles({
 export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
     const styles = useStyles();
 
-    const savedMortgageDetails = localStorage.getItem("mortgageDetails");
-    const parsedMortgageDetails = JSON.parse(savedMortgageDetails ?? "{}");
+    const [{ settings: initialSettings, options: initialOptions }] =
+        React.useState(() =>
+            loadState(browserStorage() ?? { getItem: () => null })
+        );
 
-    const [firstTimeBuyer, setFirstTimeBuyer] = React.useState(true);
-
-    const [interestRate, setInterestRate] = React.useState<number | undefined>(
-        parsedMortgageDetails.interestRate ?? 4.0
-    );
-    const [useGlobalInterestRate, setUseGlobalInterestRate] = React.useState(
-        parsedMortgageDetails.useGlobalInterestRate ?? true
-    );
-
-    const [maxLoan, setMaxLoan] = React.useState(
-        parsedMortgageDetails.maxLoan ?? 0
-    );
-
-    const [term, setTerm] = React.useState(parsedMortgageDetails.term ?? 35);
-
-    const [fees, setFees] = React.useState<MortgageFees>(
-        parsedMortgageDetails.fees ?? {
-            valuationFee: 185,
-            surveyFee: 600,
-            // legalFee: 3382.5,
-            legalFee: 2800,
-            searchFee: 250,
-            registerOfDeedsFee: 100,
-            landRegistryFee: 975,
-        }
-    );
-
+    const [settings, setSettings] =
+        React.useState<MortgageSettings>(initialSettings);
+    const [options, setOptions] =
+        React.useState<MortgageOptionState[]>(initialOptions);
     const [isPanelOpen, setIsPanelOpen] = React.useState(false);
 
+    const {
+        firstTimeBuyer,
+        interestRate,
+        useGlobalInterestRate,
+        maxLoan,
+        term,
+        fees,
+    } = settings;
+
     useEffect(() => {
-        localStorage.setItem(
-            "mortgageDetails",
-            JSON.stringify({
-                fees,
-                interestRate,
-                useGlobalInterestRate,
-                maxLoan,
-                term,
-            })
+        const storage = browserStorage();
+        if (storage) {
+            saveState(storage, { settings, options });
+        }
+    }, [settings, options]);
+
+    const updateSettings = (changes: Partial<MortgageSettings>) =>
+        setSettings((current) => ({ ...current, ...changes }));
+
+    const updateOption = (
+        id: number,
+        changes: Partial<MortgageOptionState>
+    ) =>
+        setOptions((current) =>
+            current.map((option) =>
+                option.id === id ? { ...option, ...changes } : option
+            )
         );
-    }, [fees, interestRate, useGlobalInterestRate, maxLoan, term]);
 
     return (
         <main className={styles.page}>
@@ -144,14 +146,24 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
                 <div className={styles.settings}>
                     <InterestRate
                         interestRate={interestRate}
-                        setInterestRate={setInterestRate}
+                        setInterestRate={(value) =>
+                            updateSettings({ interestRate: value ?? 0 })
+                        }
                         useGlobalInterestRate={useGlobalInterestRate}
-                        setUseGlobalInterestRate={setUseGlobalInterestRate}
+                        setUseGlobalInterestRate={(value) =>
+                            updateSettings({ useGlobalInterestRate: value })
+                        }
                     />
 
-                    <MaxLoanInput maxLoan={maxLoan} setMaxLoan={setMaxLoan} />
+                    <MaxLoanInput
+                        maxLoan={maxLoan}
+                        setMaxLoan={(value) => updateSettings({ maxLoan: value })}
+                    />
 
-                    <TermInput term={term} setTerm={setTerm} />
+                    <TermInput
+                        term={term}
+                        setTerm={(value) => updateSettings({ term: value })}
+                    />
 
                     <div className={styles.buyerAndFees}>
                         <Checkbox
@@ -159,7 +171,9 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
                             label="First-time buyer"
                             checked={firstTimeBuyer}
                             onChange={(_e, data) => {
-                                setFirstTimeBuyer(data.checked === true);
+                                updateSettings({
+                                    firstTimeBuyer: data.checked === true,
+                                });
                             }}
                         />
                         <Button onClick={() => setIsPanelOpen(true)}>
@@ -178,12 +192,15 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
                     role="list"
                     aria-label="Mortgage options"
                 >
-                    {[1, 2, 3].map((id) => (
+                    {options.map((option) => (
                         <MortgageOption
-                            key={id}
+                            key={option.id}
+                            option={option}
+                            onChange={(changes) =>
+                                updateOption(option.id, changes)
+                            }
                             fees={fees}
                             firstTimeBuyer={firstTimeBuyer}
-                            id={id}
                             interestRate={interestRate}
                             useGlobalInterestRate={useGlobalInterestRate}
                             maxLoan={maxLoan}
@@ -218,7 +235,7 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
 
             <FeesPanel
                 fees={fees}
-                setFees={setFees}
+                setFees={(value) => updateSettings({ fees: value })}
                 isPanelOpen={isPanelOpen}
                 setIsPanelOpen={setIsPanelOpen}
             />
@@ -227,9 +244,10 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
 };
 
 interface MortgageOptionProps {
+    option: MortgageOptionState;
+    onChange: (changes: Partial<MortgageOptionState>) => void;
     fees: MortgageFees;
     firstTimeBuyer: boolean;
-    id: number;
     interestRate: number | undefined;
     useGlobalInterestRate: boolean;
     maxLoan: number;
@@ -258,9 +276,10 @@ const MortgageOption: React.FC<MortgageOptionProps> = (
 ) => {
     const styles = useMortgageOptionStyles();
     const {
+        option,
+        onChange,
         fees,
         firstTimeBuyer,
-        id,
         interestRate,
         useGlobalInterestRate,
         maxLoan,
@@ -271,12 +290,13 @@ const MortgageOption: React.FC<MortgageOptionProps> = (
         <div
             className={styles.optionContainer}
             role="listitem"
-            aria-label={`Mortgage option ${id}`}
+            aria-label={`Mortgage option ${option.id}`}
         >
-            <h3 className={styles.optionTitle}>Option {id}</h3>
+            <h3 className={styles.optionTitle}>Option {option.id}</h3>
 
             <MortgageDetails
-                id={id}
+                option={option}
+                onChange={onChange}
                 fees={fees}
                 firstTimeBuyer={firstTimeBuyer}
                 interestRate={useGlobalInterestRate ? interestRate : undefined}

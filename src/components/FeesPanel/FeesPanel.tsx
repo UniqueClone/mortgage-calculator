@@ -17,7 +17,7 @@ import { MortgageFees } from "../MortgageDetails/MortgageDetails.mapper";
 
 interface FeesPanelProps {
     fees: MortgageFees;
-    setFees: React.Dispatch<React.SetStateAction<MortgageFees>>;
+    setFees: (fees: MortgageFees) => void;
     isPanelOpen: boolean;
     setIsPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
