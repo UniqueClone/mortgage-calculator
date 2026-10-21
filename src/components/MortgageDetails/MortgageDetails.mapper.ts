@@ -53,9 +53,10 @@ export const totalFees = (fees: MortgageFees) =>
 // VAT-exclusive price.
 const NEW_HOME_VAT_RATE = 0.135;
 
-// Help to Buy rules for purchases up to 31 December 2029.
+// Help to Buy rules for applications from 7 October 2026 to 31 December 2029
+// (the maximum was €30,000 before that).
 export const HELP_TO_BUY = {
-    maxRefund: 30_000,
+    maxRefund: 35_000,
     maxShareOfPrice: 0.1,
     maxPrice: 500_000,
     minLoanToValue: 0.7,

@@ -116,12 +116,12 @@ describe("maxLoanAmount", () => {
 });
 
 describe("helpToBuy", () => {
-    it("is 10% of the price up to €30,000", () => {
+    it("is 10% of the price up to €35,000", () => {
         expect(helpToBuy(250_000, 225_000, true, true)).toEqual({
             amount: 25_000,
         });
         expect(helpToBuy(450_000, 405_000, true, true)).toEqual({
-            amount: 30_000,
+            amount: 35_000,
         });
     });
 
