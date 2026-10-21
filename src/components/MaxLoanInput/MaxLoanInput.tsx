@@ -1,5 +1,6 @@
-import { Field, Input } from "@fluentui/react-components";
+import { Field } from "@fluentui/react-components";
 import React from "react";
+import { NumberInput } from "../NumberInput/NumberInput";
 
 export interface MaxLoanInputProps {
     maxLoan: number;
@@ -16,22 +17,10 @@ export const MaxLoanInput: React.FC<MaxLoanInputProps> = (
             label="Max loan"
             hint="From your approval in principle, or 0 if you have none. Loans are also capped at 90% of the price."
         >
-            <Input
-                type="number"
-                min={0}
-                value={maxLoan.toString()}
-                onChange={(_e, data) => {
-                    const newValue = data.value;
-                    if (newValue === "") {
-                        setMaxLoan(0);
-                    } else if (isNaN(parseFloat(newValue))) {
-                        return;
-                    } else if (parseFloat(newValue) <= 0) {
-                        setMaxLoan(0);
-                    } else {
-                        setMaxLoan(parseFloat(newValue));
-                    }
-                }}
+            <NumberInput
+                value={maxLoan}
+                onChange={setMaxLoan}
+                groupDigits
                 contentBefore="€"
             />
         </Field>

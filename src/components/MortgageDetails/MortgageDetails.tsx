@@ -1,7 +1,6 @@
 import {
     Button,
     Field,
-    Input,
     Text,
     makeStyles,
     tokens,
@@ -15,6 +14,7 @@ import {
     savingsRequired,
 } from "./MortgageDetails.mapper";
 import { MortgageOptionState } from "../../storage";
+import { NumberInput } from "../NumberInput/NumberInput";
 
 export interface MortgageDetailsProps {
     option: MortgageOptionState;
@@ -87,22 +87,6 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
     const { option, onChange, fees, interestRate, maxLoan, term } = props;
     const { housePrice, loanAmount } = option;
 
-    const handleHousePriceChange = (newValue: string) => {
-        if (newValue === "") {
-            onChange({ housePrice: 0 });
-        } else if (!isNaN(parseFloat(newValue))) {
-            onChange({ housePrice: parseFloat(newValue) });
-        }
-    };
-
-    const handleLoanAmountChange = (newValue: string) => {
-        if (newValue === "") {
-            onChange({ loanAmount: 0 });
-        } else if (!isNaN(parseFloat(newValue))) {
-            onChange({ loanAmount: Math.max(parseFloat(newValue), 0) });
-        }
-    };
-
     const maxLoanForPrice = maxLoanAmount(housePrice, maxLoan);
     const savings = savingsRequired(housePrice, loanAmount, fees);
 
@@ -119,31 +103,23 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
         <div className={styles.container}>
             <div className={styles.inputs}>
                 <Field label="House price">
-                    <Input
-                        type="number"
-                        min={0}
-                        value={housePrice.toString()}
-                        onChange={(_e, data) =>
-                            handleHousePriceChange(data.value)
-                        }
+                    <NumberInput
+                        value={housePrice}
+                        onChange={(value) => onChange({ housePrice: value })}
+                        groupDigits
                         contentBefore="€"
                     />
                 </Field>
 
                 {interestRate === undefined && (
                     <Field label="Interest rate">
-                        <Input
-                            type="number"
+                        <NumberInput
+                            value={option.interestRate}
+                            onChange={(value) =>
+                                onChange({ interestRate: value })
+                            }
                             min={0}
                             max={100}
-                            step={0.05}
-                            value={option.interestRate.toString()}
-                            onChange={(_e, data) => {
-                                const value = parseFloat(data.value);
-                                onChange({
-                                    interestRate: isNaN(value) ? 0 : value,
-                                });
-                            }}
                             contentAfter="%"
                         />
                     </Field>
@@ -154,13 +130,10 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                     validationState={loanWarning ? "warning" : "none"}
                     validationMessage={loanWarning}
                 >
-                    <Input
-                        type="number"
-                        min={0}
-                        value={loanAmount.toString()}
-                        onChange={(_e, data) =>
-                            handleLoanAmountChange(data.value)
-                        }
+                    <NumberInput
+                        value={loanAmount}
+                        onChange={(value) => onChange({ loanAmount: value })}
+                        groupDigits
                         contentBefore="€"
                     />
                 </Field>

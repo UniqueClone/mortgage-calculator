@@ -1,4 +1,5 @@
 import React from "react";
+import { NumberInput } from "../NumberInput/NumberInput";
 import {
     Checkbox,
     Field,
@@ -50,34 +51,17 @@ export const InterestRate: React.FC<InterestRateProps> = (
                         : "Set separately for each option"
                 }
             >
-                <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    step={0.05}
-                    disabled={!useGlobalInterestRate}
-                    value={
-                        useGlobalInterestRate
-                            ? interestRate?.toString() || ""
-                            : ""
-                    }
-                    onChange={(_e, data) => {
-                        const newValue = data.value;
-                        if (newValue === "") {
-                            setInterestRate(0);
-                        } else if (isNaN(parseFloat(newValue))) {
-                            return;
-                        } else if (
-                            parseFloat(newValue) <= 0 ||
-                            parseFloat(newValue) > 100
-                        ) {
-                            setInterestRate(0);
-                        } else {
-                            setInterestRate(parseFloat(newValue));
-                        }
-                    }}
-                    contentAfter="%"
-                />
+                {useGlobalInterestRate ? (
+                    <NumberInput
+                        value={interestRate ?? 0}
+                        onChange={setInterestRate}
+                        min={0}
+                        max={100}
+                        contentAfter="%"
+                    />
+                ) : (
+                    <Input disabled value="" contentAfter="%" />
+                )}
             </Field>
 
             <Checkbox

@@ -1,5 +1,6 @@
-import { Field, Input } from "@fluentui/react-components";
+import { Field } from "@fluentui/react-components";
 import React from "react";
+import { NumberInput } from "../NumberInput/NumberInput";
 
 export interface TermInputProps {
     term: number;
@@ -9,16 +10,12 @@ export interface TermInputProps {
 export const TermInput: React.FC<TermInputProps> = (props: TermInputProps) => {
     return (
         <Field label="Term">
-            <Input
-                type="number"
+            <NumberInput
+                value={props.term}
+                onChange={props.setTerm}
+                decimals={0}
                 min={1}
-                value={props.term.toString()}
-                onChange={(_e, data) => {
-                    const newValue = data.value;
-                    if (newValue && !isNaN(parseFloat(newValue))) {
-                        props.setTerm(parseFloat(newValue));
-                    }
-                }}
+                max={40}
                 contentAfter="years"
             />
         </Field>
