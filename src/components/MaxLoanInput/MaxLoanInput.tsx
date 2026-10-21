@@ -15,12 +15,14 @@ export const MaxLoanInput: React.FC<MaxLoanInputProps> = (
     return (
         <Field
             label="Max loan"
-            hint="From your approval in principle, or 0 if you have none. Loans are also capped at 90% of the price."
+            hint="From your approval in principle, if you have one. Loans are also capped at 90% of the price."
         >
             <NumberInput
                 value={maxLoan}
                 onChange={setMaxLoan}
                 groupDigits
+                zeroAsEmpty
+                placeholder="None"
                 contentBefore="€"
             />
         </Field>

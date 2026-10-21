@@ -10,6 +10,8 @@ export interface NumberInputProps
     decimals?: number;
     /** Show thousands separators when the field isn't being edited. */
     groupDigits?: boolean;
+    /** Show 0 as an empty field, e.g. for optional values. */
+    zeroAsEmpty?: boolean;
     min?: number;
     max?: number;
 }
@@ -19,6 +21,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
     onChange,
     decimals = 2,
     groupDigits = false,
+    zeroAsEmpty = false,
     min,
     max,
     onFocus,
@@ -26,11 +29,15 @@ export const NumberInput: React.FC<NumberInputProps> = ({
     ...inputProps
 }) => {
     // While focused, show exactly what the user typed so they can clear the
-    // field or type "3." on the way to "3.5".
+    // field or type "3." on the way to "3.5". Separators are reapplied on
+    // blur.
     const [editingText, setEditingText] = React.useState<string>();
 
     const displayText =
-        editingText ?? formatNumber(value, decimals, groupDigits);
+        editingText ??
+        (zeroAsEmpty && value === 0
+            ? ""
+            : formatNumber(value, decimals, groupDigits));
 
     return (
         <Input
@@ -39,10 +46,9 @@ export const NumberInput: React.FC<NumberInputProps> = ({
             inputMode={decimals > 0 ? "decimal" : "numeric"}
             value={displayText}
             onFocus={(e) => {
-                // Start empty rather than "0" so typing doesn't give "0400000"
-                setEditingText(
-                    value === 0 ? "" : formatNumber(value, decimals, false)
-                );
+                // Keep the displayed text so a tab-selection survives, but
+                // start empty rather than "0" so typing doesn't give "0400000"
+                setEditingText(value === 0 ? "" : displayText);
                 onFocus?.(e);
             }}
             onChange={(_e, data) => {

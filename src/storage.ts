@@ -5,6 +5,7 @@ export interface MortgageSettings {
     interestRate: number;
     useGlobalInterestRate: boolean;
     maxLoan: number;
+    income: number;
     term: number;
     fees: MortgageFees;
 }
@@ -39,6 +40,7 @@ export const defaultSettings: MortgageSettings = {
     interestRate: 4.0,
     useGlobalInterestRate: true,
     maxLoan: 0,
+    income: 0,
     term: 35,
     fees: defaultFees,
 };
@@ -105,6 +107,7 @@ const parseSettings = (value: unknown): MortgageSettings => {
             defaultSettings.useGlobalInterestRate
         ),
         maxLoan: numberOr(saved.maxLoan, defaultSettings.maxLoan),
+        income: numberOr(saved.income, defaultSettings.income),
         term: numberOr(saved.term, defaultSettings.term),
         fees: parseFees(saved.fees),
     };

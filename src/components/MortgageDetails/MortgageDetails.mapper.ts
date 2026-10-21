@@ -1,3 +1,5 @@
+import type { MortgageOptionState, MortgageSettings } from "../../storage";
+
 export interface MortgageFees {
     valuationFee: number;
     surveyFee: number;
@@ -10,6 +12,10 @@ export interface MortgageFees {
 // Central Bank of Ireland limit for first-time and second/subsequent buyers
 // since 1 January 2023.
 export const LOAN_TO_VALUE_LIMIT = 0.9;
+
+// Central Bank of Ireland loan-to-income limits since 1 January 2023.
+export const loanToIncomeLimit = (firstTimeBuyer: boolean) =>
+    firstTimeBuyer ? 4 : 3.5;
 
 export const roundToCents = (value: number) => Math.round(value * 100) / 100;
 
@@ -73,12 +79,36 @@ export const formatter = new Intl.NumberFormat("en-IE", {
     minimumFractionDigits: 2,
 });
 
-// The largest loan allowed for a house price: the loan-to-value limit,
-// further capped by the approved max loan when one is set (0 means none).
-export const maxLoanAmount = (housePrice: number, maxLoan: number) => {
-    const ltvLimit = housePrice * LOAN_TO_VALUE_LIMIT;
-    const limit = maxLoan > 0 ? Math.min(ltvLimit, maxLoan) : ltvLimit;
-    return roundToCents(Math.max(limit, 0));
+export interface BorrowingLimits {
+    /** Approved loan amount; 0 means none. */
+    maxLoan: number;
+    /** Gross annual household income; 0 means not given. */
+    income: number;
+    firstTimeBuyer: boolean;
+}
+
+export type LoanLimitReason = "loanToValue" | "loanToIncome" | "maxLoan";
+
+// The largest loan allowed for a house price, and which rule sets it: the
+// loan-to-value limit, capped by the loan-to-income limit when an income is
+// given and by the approved max loan when one is set.
+export const maxLoanAmount = (
+    housePrice: number,
+    { maxLoan, income, firstTimeBuyer }: BorrowingLimits
+): { amount: number; reason: LoanLimitReason } => {
+    let amount = Math.max(housePrice * LOAN_TO_VALUE_LIMIT, 0);
+    let reason: LoanLimitReason = "loanToValue";
+
+    if (income > 0 && income * loanToIncomeLimit(firstTimeBuyer) < amount) {
+        amount = income * loanToIncomeLimit(firstTimeBuyer);
+        reason = "loanToIncome";
+    }
+    if (maxLoan > 0 && maxLoan < amount) {
+        amount = maxLoan;
+        reason = "maxLoan";
+    }
+
+    return { amount: roundToCents(amount), reason };
 };
 
 export const getMonthlyPayment = (
@@ -108,4 +138,54 @@ export const getMonthlyPayment = (
         (loanAmount * monthlyInterestRate * growth) / (growth - 1);
 
     return roundToCents(monthlyPayment);
+};
+
+const limitDescriptions: Record<
+    LoanLimitReason,
+    (firstTimeBuyer: boolean) => string
+> = {
+    loanToValue: () => `${LOAN_TO_VALUE_LIMIT * 100}% of the price`,
+    loanToIncome: (firstTimeBuyer) =>
+        `${loanToIncomeLimit(firstTimeBuyer)}× your income`,
+    maxLoan: () => "your approved max loan",
+};
+
+export interface OptionResult {
+    interestRate: number;
+    maxLoan: number;
+    loanWarning?: string;
+    monthlyPayment: number;
+    savings: SavingsBreakdown;
+}
+
+export const calculateOption = (
+    option: MortgageOptionState,
+    settings: MortgageSettings
+): OptionResult => {
+    const { housePrice, loanAmount } = option;
+    const interestRate = settings.useGlobalInterestRate
+        ? settings.interestRate
+        : option.interestRate;
+    const limit = maxLoanAmount(housePrice, settings);
+
+    let loanWarning: string | undefined;
+    if (housePrice > 0 && loanAmount > housePrice) {
+        loanWarning = "More than the house price.";
+    } else if (housePrice > 0 && loanAmount > limit.amount) {
+        loanWarning = `Above ${limitDescriptions[limit.reason](
+            settings.firstTimeBuyer
+        )} (${formatter.format(limit.amount)}).`;
+    }
+
+    return {
+        interestRate,
+        maxLoan: limit.amount,
+        loanWarning,
+        monthlyPayment: getMonthlyPayment(
+            loanAmount,
+            interestRate,
+            settings.term
+        ),
+        savings: savingsRequired(housePrice, loanAmount, settings.fees),
+    };
 };

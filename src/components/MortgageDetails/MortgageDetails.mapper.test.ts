@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { MortgageSettings, defaultSettings } from "../../storage";
 import {
     MortgageFees,
+    calculateOption,
     getMonthlyPayment,
     maxLoanAmount,
     savingsRequired,
@@ -50,16 +52,41 @@ describe("savingsRequired", () => {
 });
 
 describe("maxLoanAmount", () => {
-    it("is 90% of the price with no approved max loan", () => {
-        expect(maxLoanAmount(400_000, 0)).toBe(360_000);
+    const noLimits = { maxLoan: 0, income: 0, firstTimeBuyer: true };
+
+    it("is 90% of the price with no other limits", () => {
+        expect(maxLoanAmount(400_000, noLimits)).toEqual({
+            amount: 360_000,
+            reason: "loanToValue",
+        });
     });
 
     it("is capped by the approved max loan", () => {
-        expect(maxLoanAmount(500_000, 380_000)).toBe(380_000);
+        expect(
+            maxLoanAmount(500_000, { ...noLimits, maxLoan: 380_000 })
+        ).toEqual({ amount: 380_000, reason: "maxLoan" });
     });
 
     it("ignores an approved max loan above the LTV limit", () => {
-        expect(maxLoanAmount(400_000, 500_000)).toBe(360_000);
+        expect(
+            maxLoanAmount(400_000, { ...noLimits, maxLoan: 500_000 }).amount
+        ).toBe(360_000);
+    });
+
+    it("is capped at 4x income for first-time buyers", () => {
+        expect(maxLoanAmount(500_000, { ...noLimits, income: 100_000 })).toEqual(
+            { amount: 400_000, reason: "loanToIncome" }
+        );
+    });
+
+    it("is capped at 3.5x income for other buyers", () => {
+        expect(
+            maxLoanAmount(500_000, {
+                ...noLimits,
+                income: 100_000,
+                firstTimeBuyer: false,
+            }).amount
+        ).toBe(350_000);
     });
 });
 
@@ -79,5 +106,57 @@ describe("getMonthlyPayment", () => {
         [360_000, NaN, 30],
     ])("returns 0 for unusable input (%s, %s, %s)", (loan, rate, term) => {
         expect(getMonthlyPayment(loan, rate, term)).toBe(0);
+    });
+});
+
+describe("calculateOption", () => {
+    const settings: MortgageSettings = {
+        ...defaultSettings,
+        interestRate: 4,
+        term: 35,
+        fees,
+    };
+    const option = {
+        id: 1,
+        housePrice: 400_000,
+        loanAmount: 360_000,
+        interestRate: 3,
+    };
+
+    it("uses the shared rate when set", () => {
+        const result = calculateOption(option, settings);
+        expect(result.interestRate).toBe(4);
+        expect(result.monthlyPayment).toBe(1_593.99);
+        expect(result.savings.total).toBe(48_910);
+        expect(result.loanWarning).toBeUndefined();
+    });
+
+    it("uses the option's own rate otherwise", () => {
+        const result = calculateOption(option, {
+            ...settings,
+            useGlobalInterestRate: false,
+        });
+        expect(result.interestRate).toBe(3);
+    });
+
+    it.each([
+        [{ loanAmount: 500_000 }, {}, "More than the house price."],
+        [{ loanAmount: 370_000 }, {}, "Above 90% of the price (€360,000.00)."],
+        [
+            { loanAmount: 360_000 },
+            { income: 80_000 },
+            "Above 4× your income (€320,000.00).",
+        ],
+        [
+            { loanAmount: 360_000 },
+            { maxLoan: 300_000 },
+            "Above your approved max loan (€300,000.00).",
+        ],
+    ])("warns when the loan is too high (%j, %j)", (change, limits, warning) => {
+        const result = calculateOption(
+            { ...option, ...change },
+            { ...settings, ...limits }
+        );
+        expect(result.loanWarning).toBe(warning);
     });
 });
