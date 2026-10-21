@@ -170,7 +170,7 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
 
                     <Field
                         label="Gross income"
-                        hint={`Yearly, combined, before tax. Optional; loans are capped at ${loanToIncomeLimit(
+                        hint={`Yearly, combined, before tax. Loans are capped at ${loanToIncomeLimit(
                             firstTimeBuyer,
                         )}× income.`}
                     >

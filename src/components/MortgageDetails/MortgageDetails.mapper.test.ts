@@ -4,6 +4,7 @@ import {
     MortgageFees,
     calculateOption,
     getMonthlyPayment,
+    helpToBuy,
     maxLoanAmount,
     savingsRequired,
     stampDuty,
@@ -36,6 +37,7 @@ describe("savingsRequired", () => {
     it("adds the deposit, fees and stamp duty", () => {
         expect(savingsRequired(400_000, 360_000, fees)).toEqual({
             deposit: 40_000,
+            helpToBuy: 0,
             fees: 4_910,
             stampDuty: 4_000,
             total: 48_910,
@@ -44,6 +46,28 @@ describe("savingsRequired", () => {
 
     it("never has a negative deposit", () => {
         expect(savingsRequired(300_000, 350_000, fees).deposit).toBe(0);
+    });
+
+    it("charges stamp duty on the VAT-exclusive price of a new build", () => {
+        expect(
+            savingsRequired(454_000, 408_600, fees, { newBuild: true })
+                .stampDuty
+        ).toBe(4_000);
+    });
+
+    it("takes Help to Buy off the deposit", () => {
+        const savings = savingsRequired(400_000, 360_000, fees, {
+            helpToBuy: 30_000,
+        });
+        expect(savings.helpToBuy).toBe(30_000);
+        expect(savings.total).toBe(18_910);
+    });
+
+    it("never uses more Help to Buy than the deposit", () => {
+        expect(
+            savingsRequired(400_000, 390_000, fees, { helpToBuy: 30_000 })
+                .helpToBuy
+        ).toBe(10_000);
     });
 
     it("totals the fees", () => {
@@ -90,6 +114,42 @@ describe("maxLoanAmount", () => {
     });
 });
 
+describe("helpToBuy", () => {
+    it("is 10% of the price up to €30,000", () => {
+        expect(helpToBuy(250_000, 225_000, true, true)).toEqual({
+            amount: 25_000,
+        });
+        expect(helpToBuy(450_000, 405_000, true, true)).toEqual({
+            amount: 30_000,
+        });
+    });
+
+    it("needs a new build", () => {
+        expect(helpToBuy(400_000, 360_000, true, false)).toEqual({
+            amount: 0,
+        });
+    });
+
+    it.each([
+        [400_000, 360_000, false, "Only for first-time buyers."],
+        [550_000, 495_000, true, "Only for homes up to €500,000."],
+        [
+            400_000,
+            200_000,
+            true,
+            "The loan must be at least 70% of the price.",
+        ],
+    ])(
+        "explains why %i / %i isn't eligible",
+        (price, loan, firstTimeBuyer, reason) => {
+            expect(helpToBuy(price, loan, firstTimeBuyer, true)).toEqual({
+                amount: 0,
+                ineligibleReason: reason,
+            });
+        }
+    );
+});
+
 describe("getMonthlyPayment", () => {
     it("amortises the loan", () => {
         expect(getMonthlyPayment(360_000, 4, 35)).toBe(1_593.99);
@@ -121,6 +181,7 @@ describe("calculateOption", () => {
         housePrice: 400_000,
         loanAmount: 360_000,
         interestRate: 3,
+        newBuild: false,
     };
 
     it("uses the shared rate when set", () => {
@@ -167,16 +228,16 @@ describe("calculateOption", () => {
 
     it.each([
         [{ loanAmount: 500_000 }, {}, "More than the house price."],
-        [{ loanAmount: 370_000 }, {}, "Above 90% of the price (€360,000.00)."],
+        [{ loanAmount: 370_000 }, {}, "Above 90% of the price (€360,000)."],
         [
             { loanAmount: 360_000 },
             { income: 80_000 },
-            "Above 4× your income (€320,000.00).",
+            "Above 4× your income (€320,000).",
         ],
         [
             { loanAmount: 360_000 },
             { maxLoan: 300_000 },
-            "Above your approved max loan (€300,000.00).",
+            "Above your approved max loan (€300,000).",
         ],
     ])("warns when the loan is too high (%j, %j)", (change, limits, warning) => {
         const result = calculateOption(

@@ -49,8 +49,67 @@ export const totalFees = (fees: MortgageFees) =>
     fees.registerOfDeedsFee +
     fees.landRegistryFee;
 
+// New homes are sold including 13.5% VAT, but stamp duty is charged on the
+// VAT-exclusive price.
+const NEW_HOME_VAT_RATE = 0.135;
+
+// Help to Buy rules for purchases up to 31 December 2029.
+export const HELP_TO_BUY = {
+    maxRefund: 30_000,
+    maxShareOfPrice: 0.1,
+    maxPrice: 500_000,
+    minLoanToValue: 0.7,
+};
+
+export interface HelpToBuyResult {
+    amount: number;
+    ineligibleReason?: string;
+}
+
+// The most Help to Buy can give. The real refund is also limited by the
+// income tax and DIRT the buyer paid in the previous four years.
+export const helpToBuy = (
+    housePrice: number,
+    loanAmount: number,
+    firstTimeBuyer: boolean,
+    newBuild: boolean
+): HelpToBuyResult => {
+    if (!newBuild || housePrice <= 0) {
+        return { amount: 0 };
+    }
+    if (!firstTimeBuyer) {
+        return { amount: 0, ineligibleReason: "Only for first-time buyers." };
+    }
+    if (housePrice > HELP_TO_BUY.maxPrice) {
+        return {
+            amount: 0,
+            ineligibleReason: `Only for homes up to ${wholeEuros.format(
+                HELP_TO_BUY.maxPrice
+            )}.`,
+        };
+    }
+    if (loanAmount < housePrice * HELP_TO_BUY.minLoanToValue) {
+        return {
+            amount: 0,
+            ineligibleReason: `The loan must be at least ${
+                HELP_TO_BUY.minLoanToValue * 100
+            }% of the price.`,
+        };
+    }
+
+    return {
+        amount: roundToCents(
+            Math.min(
+                HELP_TO_BUY.maxRefund,
+                housePrice * HELP_TO_BUY.maxShareOfPrice
+            )
+        ),
+    };
+};
+
 export interface SavingsBreakdown {
     deposit: number;
+    helpToBuy: number;
     fees: number;
     stampDuty: number;
     total: number;
@@ -59,17 +118,22 @@ export interface SavingsBreakdown {
 export const savingsRequired = (
     housePrice: number,
     loanAmount: number,
-    fees: MortgageFees
+    fees: MortgageFees,
+    { newBuild = false, helpToBuy = 0 } = {}
 ): SavingsBreakdown => {
     const deposit = Math.max(housePrice - loanAmount, 0);
+    const helpToBuyUsed = Math.min(helpToBuy, deposit);
     const feesTotal = totalFees(fees);
-    const duty = stampDuty(housePrice);
+    const duty = stampDuty(
+        newBuild ? housePrice / (1 + NEW_HOME_VAT_RATE) : housePrice
+    );
 
     return {
         deposit,
+        helpToBuy: helpToBuyUsed,
         fees: feesTotal,
         stampDuty: duty,
-        total: deposit + feesTotal + duty,
+        total: deposit - helpToBuyUsed + feesTotal + duty,
     };
 };
 
@@ -77,6 +141,13 @@ export const formatter = new Intl.NumberFormat("en-IE", {
     style: "currency",
     currency: "EUR",
     minimumFractionDigits: 2,
+});
+
+// For limits and thresholds, where cents are just noise.
+const wholeEuros = new Intl.NumberFormat("en-IE", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
 });
 
 export interface BorrowingLimits {
@@ -161,6 +232,7 @@ export interface OptionResult {
     totalInterest: number;
     /** Monthly payment if the rate rose by each of RATE_RISES points. */
     paymentsAfterRateRise: { rise: number; monthlyPayment: number }[];
+    helpToBuy: HelpToBuyResult;
     savings: SavingsBreakdown;
 }
 
@@ -180,7 +252,7 @@ export const calculateOption = (
     } else if (housePrice > 0 && loanAmount > limit.amount) {
         loanWarning = `Above ${limitDescriptions[limit.reason](
             settings.firstTimeBuyer
-        )} (${formatter.format(limit.amount)}).`;
+        )} (${wholeEuros.format(limit.amount)}).`;
     }
 
     const monthlyPayment = getMonthlyPayment(
@@ -189,6 +261,12 @@ export const calculateOption = (
         settings.term
     );
     const totalRepaid = roundToCents(monthlyPayment * settings.term * 12);
+    const htb = helpToBuy(
+        housePrice,
+        loanAmount,
+        settings.firstTimeBuyer,
+        option.newBuild
+    );
 
     return {
         interestRate,
@@ -206,6 +284,10 @@ export const calculateOption = (
                 settings.term
             ),
         })),
-        savings: savingsRequired(housePrice, loanAmount, settings.fees),
+        helpToBuy: htb,
+        savings: savingsRequired(housePrice, loanAmount, settings.fees, {
+            newBuild: option.newBuild,
+            helpToBuy: htb.amount,
+        }),
     };
 };

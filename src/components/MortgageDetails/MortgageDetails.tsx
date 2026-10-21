@@ -1,5 +1,6 @@
 import {
     Button,
+    Checkbox,
     Field,
     Text,
     makeStyles,
@@ -31,6 +32,16 @@ const useStyles = makeStyles({
     },
     maxButton: {
         alignSelf: "flex-start",
+    },
+    newBuild: {
+        display: "flex",
+        flexDirection: "column",
+    },
+    checkbox: {
+        marginLeft: `calc(-1 * ${tokens.spacingHorizontalS})`,
+    },
+    note: {
+        color: tokens.colorNeutralForeground3,
     },
     results: {
         marginTop: "auto",
@@ -72,7 +83,7 @@ const useStyles = makeStyles({
 });
 
 export const MortgageDetails: React.FC<MortgageDetailsProps> = (
-    props: MortgageDetailsProps
+    props: MortgageDetailsProps,
 ) => {
     const styles = useStyles();
     const { option, onChange, settings, result } = props;
@@ -125,6 +136,24 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                 >
                     Set loan to max
                 </Button>
+
+                <div className={styles.newBuild}>
+                    <Checkbox
+                        className={styles.checkbox}
+                        label="New build"
+                        checked={option.newBuild}
+                        onChange={(_e, data) =>
+                            onChange({ newBuild: data.checked === true })
+                        }
+                    />
+                    {option.newBuild && settings.firstTimeBuyer && (
+                        <Text size={200} className={styles.note}>
+                            {result.helpToBuy.ineligibleReason
+                                ? `No Help to Buy: ${result.helpToBuy.ineligibleReason}`
+                                : "Includes Help to Buy, which is also limited by the income tax you've paid in the last 4 years."}
+                        </Text>
+                    )}
+                </div>
             </div>
 
             <div className={styles.results}>
@@ -148,7 +177,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                                     <dt>If rates rise {rise}%</dt>
                                     <dd>{formatter.format(monthlyPayment)}</dd>
                                 </React.Fragment>
-                            )
+                            ),
                         )}
                         <dt>Total interest</dt>
                         <dd>{formatter.format(result.totalInterest)}</dd>
@@ -173,6 +202,12 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                     <dl className={styles.breakdown}>
                         <dt>Deposit</dt>
                         <dd>{formatter.format(savings.deposit)}</dd>
+                        {savings.helpToBuy > 0 && (
+                            <>
+                                <dt>Help to Buy</dt>
+                                <dd>−{formatter.format(savings.helpToBuy)}</dd>
+                            </>
+                        )}
                         <dt>Fees</dt>
                         <dd>{formatter.format(savings.fees)}</dd>
                         <dt>Stamp duty</dt>

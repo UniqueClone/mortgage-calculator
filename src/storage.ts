@@ -15,6 +15,7 @@ export interface MortgageOptionState {
     housePrice: number;
     loanAmount: number;
     interestRate: number;
+    newBuild: boolean;
 }
 
 export interface SavedState {
@@ -53,6 +54,7 @@ export const newOption = (
     housePrice: 0,
     loanAmount: 0,
     interestRate,
+    newBuild: false,
 });
 
 type StorageReader = Pick<Storage, "getItem">;
@@ -129,6 +131,7 @@ const parseOption = (
             saved.interestRate ?? saved.localInterestRate,
             fallbackRate
         ),
+        newBuild: booleanOr(saved.newBuild, false),
     };
 };
 

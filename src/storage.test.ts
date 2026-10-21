@@ -21,6 +21,7 @@ describe("loadState", () => {
             housePrice: 0,
             loanAmount: 0,
             interestRate: 4,
+            newBuild: false,
         });
     });
 
@@ -43,6 +44,7 @@ describe("loadState", () => {
             housePrice: 400000,
             loanAmount: 360000,
             interestRate: 3.9,
+            newBuild: false,
         });
         expect(state.options[1].interestRate).toBe(3.5);
         expect(state.options[2].housePrice).toBe(0);
@@ -60,7 +62,13 @@ describe("loadState", () => {
 
         expect(state.settings).toEqual(defaultSettings);
         expect(state.options).toEqual([
-            { id: 4, housePrice: 0, loanAmount: 0, interestRate: 4 },
+            {
+                id: 4,
+                housePrice: 0,
+                loanAmount: 0,
+                interestRate: 4,
+                newBuild: false,
+            },
         ]);
     });
 
