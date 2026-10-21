@@ -4,9 +4,10 @@ import {
     createLightTheme,
     BrandVariants,
     Theme,
+    makeStyles,
+    tokens,
 } from "@fluentui/react-components";
 import { useEffect, useState } from "react";
-import "./App.css";
 import { MortgageComparison } from "./components/MortgageComparison/MortgageComparison";
 
 // A muted green, used sparingly for actions and key figures
@@ -34,15 +35,58 @@ const typography: Partial<Theme> = {
     lineHeightBase300: "22px",
 };
 
-const lightTheme: Theme = { ...createLightTheme(brand), ...typography };
+// Neutrals with a slight green tint so the surfaces sit with the brand colour
+// instead of reading as flat grey. The page uses Background2 and cards
+// Background1, so cards stand off the page in both themes.
+const lightNeutrals: Partial<Theme> = {
+    colorNeutralBackground1: "#ffffff",
+    colorNeutralBackground1Hover: "#f4f6f4",
+    colorNeutralBackground1Pressed: "#e9ece9",
+    colorNeutralBackground1Selected: "#eef1ee",
+    colorNeutralBackground2: "#f4f6f3",
+    colorNeutralBackground3: "#eceeeb",
+    colorNeutralStroke1: "#c9cfca",
+    colorNeutralStroke1Hover: "#b9c0bb",
+    colorNeutralStroke2: "#dfe4e0",
+    colorNeutralStroke3: "#eaeeeb",
+    colorNeutralForeground3: "#5b6560",
+};
+
+const darkNeutrals: Partial<Theme> = {
+    colorNeutralBackground1: "#1d2320",
+    colorNeutralBackground1Hover: "#29302c",
+    colorNeutralBackground1Pressed: "#181d1a",
+    colorNeutralBackground1Selected: "#252b28",
+    colorNeutralBackground2: "#141816",
+    colorNeutralBackground3: "#0f1311",
+    colorNeutralStroke1: "#58625c",
+    colorNeutralStroke1Hover: "#6a756f",
+    colorNeutralStroke2: "#323a36",
+    colorNeutralStroke3: "#29302c",
+    colorNeutralForeground3: "#a7b1ab",
+};
+
+const lightTheme: Theme = {
+    ...createLightTheme(brand),
+    ...typography,
+    ...lightNeutrals,
+};
 
 const darkTheme: Theme = {
     ...createDarkTheme(brand),
     ...typography,
+    ...darkNeutrals,
     colorBrandForeground1: brand[120],
     colorBrandForegroundLink: brand[120],
     colorBrandForegroundLinkHover: brand[130],
 };
+
+const useStyles = makeStyles({
+    root: {
+        minHeight: "100vh",
+        backgroundColor: tokens.colorNeutralBackground2,
+    },
+});
 
 const darkQuery = "(prefers-color-scheme: dark)";
 
@@ -63,11 +107,12 @@ const usePrefersDark = () => {
 
 function App() {
     const prefersDark = usePrefersDark();
+    const styles = useStyles();
 
     return (
         <FluentProvider
             theme={prefersDark ? darkTheme : lightTheme}
-            className="app-root"
+            className={styles.root}
         >
             <MortgageComparison />
         </FluentProvider>

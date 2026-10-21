@@ -46,10 +46,17 @@ const useStyles = makeStyles({
     note: {
         color: tokens.colorNeutralForeground3,
     },
+    // Results sit in a lightly tinted panel along the bottom of the card, so
+    // they read as outputs rather than more inputs.
     results: {
         marginTop: "auto",
-        paddingTop: tokens.spacingVerticalL,
+        marginInline: `calc(-1 * ${tokens.spacingHorizontalL})`,
+        marginBottom: `calc(-1 * ${tokens.spacingHorizontalL})`,
+        padding: tokens.spacingHorizontalL,
         borderTop: `1px solid ${tokens.colorNeutralStroke2}`,
+        borderBottomLeftRadius: tokens.borderRadiusLarge,
+        borderBottomRightRadius: tokens.borderRadiusLarge,
+        backgroundColor: tokens.colorBrandBackground2,
         display: "flex",
         flexDirection: "column",
         gap: tokens.spacingVerticalM,
