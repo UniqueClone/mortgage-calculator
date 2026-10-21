@@ -150,11 +150,17 @@ const limitDescriptions: Record<
     maxLoan: () => "your approved max loan",
 };
 
+export const RATE_RISES = [1, 2];
+
 export interface OptionResult {
     interestRate: number;
     maxLoan: number;
     loanWarning?: string;
     monthlyPayment: number;
+    totalRepaid: number;
+    totalInterest: number;
+    /** Monthly payment if the rate rose by each of RATE_RISES points. */
+    paymentsAfterRateRise: { rise: number; monthlyPayment: number }[];
     savings: SavingsBreakdown;
 }
 
@@ -177,15 +183,29 @@ export const calculateOption = (
         )} (${formatter.format(limit.amount)}).`;
     }
 
+    const monthlyPayment = getMonthlyPayment(
+        loanAmount,
+        interestRate,
+        settings.term
+    );
+    const totalRepaid = roundToCents(monthlyPayment * settings.term * 12);
+
     return {
         interestRate,
         maxLoan: limit.amount,
         loanWarning,
-        monthlyPayment: getMonthlyPayment(
-            loanAmount,
-            interestRate,
-            settings.term
-        ),
+        monthlyPayment,
+        totalRepaid,
+        totalInterest:
+            loanAmount > 0 ? roundToCents(totalRepaid - loanAmount) : 0,
+        paymentsAfterRateRise: RATE_RISES.map((rise) => ({
+            rise,
+            monthlyPayment: getMonthlyPayment(
+                loanAmount,
+                interestRate + rise,
+                settings.term
+            ),
+        })),
         savings: savingsRequired(housePrice, loanAmount, settings.fees),
     };
 };

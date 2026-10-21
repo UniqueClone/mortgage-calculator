@@ -131,6 +131,32 @@ describe("calculateOption", () => {
         expect(result.loanWarning).toBeUndefined();
     });
 
+    it("totals the cost over the term", () => {
+        const result = calculateOption(option, settings);
+        expect(result.totalRepaid).toBe(669_475.8);
+        expect(result.totalInterest).toBe(309_475.8);
+    });
+
+    it("shows the payment after rate rises", () => {
+        const result = calculateOption(option, settings);
+        expect(result.paymentsAfterRateRise).toEqual([
+            { rise: 1, monthlyPayment: getMonthlyPayment(360_000, 5, 35) },
+            { rise: 2, monthlyPayment: getMonthlyPayment(360_000, 6, 35) },
+        ]);
+        expect(result.paymentsAfterRateRise[0].monthlyPayment).toBeGreaterThan(
+            result.monthlyPayment
+        );
+    });
+
+    it("has no interest without a loan", () => {
+        const result = calculateOption(
+            { ...option, loanAmount: 0 },
+            settings
+        );
+        expect(result.totalRepaid).toBe(0);
+        expect(result.totalInterest).toBe(0);
+    });
+
     it("uses the option's own rate otherwise", () => {
         const result = calculateOption(option, {
             ...settings,

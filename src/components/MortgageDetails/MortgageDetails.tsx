@@ -141,6 +141,20 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                     >
                         {formatter.format(result.monthlyPayment)}
                     </Text>
+                    <dl className={styles.breakdown}>
+                        {result.paymentsAfterRateRise.map(
+                            ({ rise, monthlyPayment }) => (
+                                <React.Fragment key={rise}>
+                                    <dt>If rates rise {rise}%</dt>
+                                    <dd>{formatter.format(monthlyPayment)}</dd>
+                                </React.Fragment>
+                            )
+                        )}
+                        <dt>Total interest</dt>
+                        <dd>{formatter.format(result.totalInterest)}</dd>
+                        <dt>Total repaid</dt>
+                        <dd>{formatter.format(result.totalRepaid)}</dd>
+                    </dl>
                 </div>
 
                 <div className={styles.result}>
