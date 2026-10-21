@@ -2,32 +2,69 @@ export interface MortgageFees {
     valuationFee: number;
     surveyFee: number;
     legalFee: number;
-    stampDuty?: number;
     searchFee: number;
     registerOfDeedsFee: number;
     landRegistryFee: number;
 }
 
-export const savingsRequired = (
-    houseValue: number,
-    deposit: number,
-    fees: MortgageFees
-) => {
-    const savingsRequired =
-        deposit +
-        fees.valuationFee +
-        fees.surveyFee +
-        fees.legalFee +
-        (fees.stampDuty ?? houseValue / 100) +
-        fees.searchFee +
-        fees.registerOfDeedsFee +
-        fees.landRegistryFee;
+// Central Bank of Ireland limit for first-time and second/subsequent buyers
+// since 1 January 2023.
+export const LOAN_TO_VALUE_LIMIT = 0.9;
 
-    if (savingsRequired < 0) {
-        return 0;
-    } else {
-        return savingsRequired;
+export const roundToCents = (value: number) => Math.round(value * 100) / 100;
+
+// Residential rates for instruments executed on or after 2 October 2024.
+const STAMP_DUTY_BANDS = [
+    { upTo: 1_000_000, rate: 0.01 },
+    { upTo: 1_500_000, rate: 0.02 },
+    { upTo: Infinity, rate: 0.06 },
+];
+
+export const stampDuty = (housePrice: number) => {
+    let duty = 0;
+    let bandStart = 0;
+
+    for (const { upTo, rate } of STAMP_DUTY_BANDS) {
+        if (housePrice <= bandStart) {
+            break;
+        }
+        duty += (Math.min(housePrice, upTo) - bandStart) * rate;
+        bandStart = upTo;
     }
+
+    return roundToCents(duty);
+};
+
+export const totalFees = (fees: MortgageFees) =>
+    fees.valuationFee +
+    fees.surveyFee +
+    fees.legalFee +
+    fees.searchFee +
+    fees.registerOfDeedsFee +
+    fees.landRegistryFee;
+
+export interface SavingsBreakdown {
+    deposit: number;
+    fees: number;
+    stampDuty: number;
+    total: number;
+}
+
+export const savingsRequired = (
+    housePrice: number,
+    loanAmount: number,
+    fees: MortgageFees
+): SavingsBreakdown => {
+    const deposit = Math.max(housePrice - loanAmount, 0);
+    const feesTotal = totalFees(fees);
+    const duty = stampDuty(housePrice);
+
+    return {
+        deposit,
+        fees: feesTotal,
+        stampDuty: duty,
+        total: deposit + feesTotal + duty,
+    };
 };
 
 export const formatter = new Intl.NumberFormat("en-IE", {
@@ -36,38 +73,12 @@ export const formatter = new Intl.NumberFormat("en-IE", {
     minimumFractionDigits: 2,
 });
 
-export const cleanLoanAmount = (
-    firstTimeBuyer: boolean,
-    housePrice: number,
-    loanAmount: number,
-    maxLoanAmount: number | undefined
-): number => {
-    if (loanAmount < 0) {
-        return 0;
-    } else if (
-        (firstTimeBuyer && loanAmount > housePrice * 0.9) ||
-        (!firstTimeBuyer && loanAmount > housePrice * 0.8)
-    ) {
-        if (firstTimeBuyer) {
-            return cleanLoanAmount(
-                true,
-                housePrice,
-                housePrice * 0.9,
-                maxLoanAmount
-            );
-        } else {
-            return cleanLoanAmount(
-                false,
-                housePrice,
-                housePrice * 0.8,
-                maxLoanAmount
-            );
-        }
-    } else if (maxLoanAmount && loanAmount > maxLoanAmount) {
-        return maxLoanAmount;
-    } else {
-        return parseFloat(loanAmount.toFixed(2));
-    }
+// The largest loan allowed for a house price: the loan-to-value limit,
+// further capped by the approved max loan when one is set (0 means none).
+export const maxLoanAmount = (housePrice: number, maxLoan: number) => {
+    const ltvLimit = housePrice * LOAN_TO_VALUE_LIMIT;
+    const limit = maxLoan > 0 ? Math.min(ltvLimit, maxLoan) : ltvLimit;
+    return roundToCents(Math.max(limit, 0));
 };
 
 export const getMonthlyPayment = (
@@ -75,62 +86,26 @@ export const getMonthlyPayment = (
     interestRate: number,
     loanTerm: number
 ) => {
-    if (isNaN(loanAmount) || isNaN(interestRate) || isNaN(loanTerm)) {
+    const numberOfPayments = loanTerm * 12;
+
+    if (
+        !Number.isFinite(loanAmount) ||
+        !Number.isFinite(interestRate) ||
+        !Number.isFinite(numberOfPayments) ||
+        loanAmount <= 0 ||
+        numberOfPayments <= 0
+    ) {
         return 0;
+    }
+
+    if (interestRate <= 0) {
+        return roundToCents(loanAmount / numberOfPayments);
     }
 
     const monthlyInterestRate = interestRate / 100 / 12;
-    const numberOfPayments = loanTerm * 12;
-    const numerator =
-        loanAmount *
-        monthlyInterestRate *
-        (1 + monthlyInterestRate) ** numberOfPayments;
-    const denominator = (1 + monthlyInterestRate) ** numberOfPayments - 1;
+    const growth = (1 + monthlyInterestRate) ** numberOfPayments;
+    const monthlyPayment =
+        (loanAmount * monthlyInterestRate * growth) / (growth - 1);
 
-    const monthlyPayment = numerator / denominator;
-
-    // Handle edge case where interest rate is 0%
-    if (isNaN(monthlyPayment) || !isFinite(monthlyPayment)) {
-        return 0;
-    }
-
-    return parseFloat(monthlyPayment.toFixed(2));
-};
-
-export const setLoanAmountToMax = (
-    firstTimeBuyer: boolean,
-    houseValue: number,
-    maxLoanAmount: number,
-    setLoanAmount: (newValue: number) => void
-) => {
-    if (
-        // if first time buyer and max loan amount is greater than 90% of house value and max loan amount is set
-        firstTimeBuyer &&
-        houseValue * 0.9 > maxLoanAmount &&
-        maxLoanAmount > 0
-    ) {
-        setLoanAmount(maxLoanAmount);
-        console.log("if, maxLoanAmount", maxLoanAmount);
-    } else if (
-        // if not first time buyer and max loan amount is greater than 80% of house value and max loan amount is set
-        !firstTimeBuyer &&
-        houseValue * 0.8 > maxLoanAmount &&
-        maxLoanAmount > 0
-    ) {
-        setLoanAmount(maxLoanAmount);
-        console.log("else if, maxLoanAmount", maxLoanAmount);
-    } else {
-        // if first time buyer set loan amount to 90% of house value, otherwise set to 80% of house value
-        firstTimeBuyer
-            ? setLoanAmount(houseValue * 0.9)
-            : setLoanAmount(houseValue * 0.8);
-        console.log(
-            "else, houseValue",
-            houseValue,
-            "firstTimeBuyer",
-            firstTimeBuyer,
-            "maxLoanAmount",
-            maxLoanAmount
-        );
-    }
+    return roundToCents(monthlyPayment);
 };

@@ -14,7 +14,7 @@ export const MaxLoanInput: React.FC<MaxLoanInputProps> = (
     return (
         <Field
             label="Max loan"
-            hint="From your approval in principle. Leave at 0 for no limit."
+            hint="From your approval in principle, or 0 if you have none. Loans are also capped at 90% of the price."
         >
             <Input
                 type="number"

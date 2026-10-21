@@ -11,8 +11,8 @@ import {
     MortgageFees,
     formatter,
     getMonthlyPayment,
+    maxLoanAmount,
     savingsRequired,
-    setLoanAmountToMax,
 } from "./MortgageDetails.mapper";
 
 export interface MortgageDetailsProps {
@@ -82,17 +82,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
     props: MortgageDetailsProps
 ) => {
     const styles = useStyles();
-    const { id, fees, firstTimeBuyer, interestRate, maxLoan, term } = props;
-
-    const [deposit, setDeposit] = React.useState<number>(0);
-
-    const updateDeposit = (newValue: number) => {
-        if (newValue < 0) {
-            setDeposit(0);
-        } else {
-            setDeposit(newValue);
-        }
-    };
+    const { id, fees, interestRate, maxLoan, term } = props;
 
     const localStorageData = localStorage.getItem("mortgageOption" + id);
 
@@ -127,9 +117,6 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
             return;
         } else if (isNaN(parseFloat(newValue))) {
             return;
-        } else if (parseFloat(newValue) > maxLoan && maxLoan > 0) {
-            setLoanAmount(maxLoan);
-            return;
         } else if (parseFloat(newValue) < 0) {
             setLoanAmount(0);
             return;
@@ -145,9 +132,17 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
         );
     }, [houseValue, loanAmount, localInterestRate, id]);
 
-    useEffect(() => {
-        updateDeposit(houseValue - loanAmount);
-    }, [houseValue, loanAmount]);
+    const maxLoanForPrice = maxLoanAmount(houseValue, maxLoan);
+    const savings = savingsRequired(houseValue, loanAmount, fees);
+
+    let loanWarning: string | undefined;
+    if (houseValue > 0 && loanAmount > houseValue) {
+        loanWarning = "More than the house price.";
+    } else if (houseValue > 0 && loanAmount > maxLoanForPrice) {
+        loanWarning = `Above the maximum of ${formatter.format(
+            maxLoanForPrice
+        )}.`;
+    }
 
     return (
         <div className={styles.container}>
@@ -183,7 +178,11 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                     </Field>
                 )}
 
-                <Field label="Loan amount">
+                <Field
+                    label="Loan amount"
+                    validationState={loanWarning ? "warning" : "none"}
+                    validationMessage={loanWarning}
+                >
                     <Input
                         type="number"
                         min={0}
@@ -198,14 +197,7 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                 <Button
                     className={styles.maxButton}
                     size="small"
-                    onClick={() =>
-                        setLoanAmountToMax(
-                            firstTimeBuyer,
-                            houseValue,
-                            maxLoan,
-                            setLoanAmount
-                        )
-                    }
+                    onClick={() => setLoanAmount(maxLoanForPrice)}
                 >
                     Set loan to max
                 </Button>
@@ -244,17 +236,15 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                         role="status"
                         aria-live="polite"
                     >
-                        {formatter.format(
-                            savingsRequired(houseValue, deposit, fees)
-                        )}
+                        {formatter.format(savings.total)}
                     </Text>
                     <dl className={styles.breakdown}>
                         <dt>Deposit</dt>
-                        <dd>{formatter.format(deposit)}</dd>
+                        <dd>{formatter.format(savings.deposit)}</dd>
                         <dt>Fees</dt>
-                        <dd>{formatter.format(savingsRequired(0, 0, fees))}</dd>
+                        <dd>{formatter.format(savings.fees)}</dd>
                         <dt>Stamp duty</dt>
-                        <dd>{formatter.format(houseValue * 0.01)}</dd>
+                        <dd>{formatter.format(savings.stampDuty)}</dd>
                     </dl>
                 </div>
             </div>

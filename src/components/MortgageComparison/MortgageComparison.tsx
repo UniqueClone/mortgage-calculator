@@ -63,10 +63,6 @@ const useStyles = makeStyles({
     checkbox: {
         marginLeft: `calc(-1 * ${tokens.spacingHorizontalS})`,
     },
-    hint: {
-        color: tokens.colorNeutralForeground3,
-        marginTop: `calc(-1 * ${tokens.spacingVerticalS})`,
-    },
     comparisonContainer: {
         display: "grid",
         gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
@@ -166,10 +162,6 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
                                 setFirstTimeBuyer(data.checked === true);
                             }}
                         />
-                        <Text size={200} className={styles.hint}>
-                            Loans are capped at {firstTimeBuyer ? "90%" : "80%"}{" "}
-                            of the price, or your max loan if lower.
-                        </Text>
                         <Button onClick={() => setIsPanelOpen(true)}>
                             Edit fees
                         </Button>
