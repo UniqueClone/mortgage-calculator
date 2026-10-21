@@ -4,50 +4,84 @@ import {
     DrawerHeader,
     DrawerHeaderTitle,
     Button,
+    Field,
     Text,
-    Input,
-    Label,
     makeStyles,
     tokens,
     DrawerFooter,
 } from "@fluentui/react-components";
 import { Dismiss24Regular } from "@fluentui/react-icons";
 import React from "react";
-import { MortgageFees } from "../MortgageDetails/MortgageDetails.mapper";
+import {
+    MortgageFees,
+    formatter,
+    totalFees,
+} from "../MortgageDetails/MortgageDetails.mapper";
+import { NumberInput } from "../NumberInput/NumberInput";
+import { defaultFees } from "../../storage";
 
 interface FeesPanelProps {
     fees: MortgageFees;
-    setFees: React.Dispatch<React.SetStateAction<MortgageFees>>;
+    setFees: (fees: MortgageFees) => void;
     isPanelOpen: boolean;
     setIsPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
+
+interface FeeField {
+    key: keyof MortgageFees;
+    label: string;
+}
+
+const purchaseFees: FeeField[] = [
+    { key: "valuationFee", label: "Valuation fee" },
+    { key: "surveyFee", label: "Survey fee" },
+];
+
+const legalFees: FeeField[] = [
+    { key: "legalFee", label: "Legal fees" },
+    { key: "searchFee", label: "Law searches fee" },
+    { key: "registerOfDeedsFee", label: "Register of Deeds fee" },
+    { key: "landRegistryFee", label: "Land Registry fee" },
+];
 
 const useStyles = makeStyles({
     drawerContent: {
         display: "flex",
         flexDirection: "column",
         gap: tokens.spacingVerticalL,
-        padding: tokens.spacingVerticalL,
+        paddingBottom: tokens.spacingVerticalL,
     },
-    inputContainer: {
-        display: "flex",
-        flexDirection: "column",
-        gap: tokens.spacingVerticalS,
-    },
-    input: {
-        width: "100%",
+    description: {
+        color: tokens.colorNeutralForeground3,
     },
     sectionHeader: {
-        marginTop: tokens.spacingVerticalXXL,
-        marginBottom: "0",
-        fontWeight: "600",
-        fontSize: "16px",
+        margin: `${tokens.spacingVerticalM} 0 0`,
+        fontSize: tokens.fontSizeBase400,
+        fontWeight: tokens.fontWeightSemibold,
+    },
+    total: {
+        display: "flex",
+        justifyContent: "space-between",
+        paddingTop: tokens.spacingVerticalM,
+        borderTop: `1px solid ${tokens.colorNeutralStroke2}`,
+        fontVariantNumeric: "tabular-nums",
     },
 });
 
 export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
     const styles = useStyles();
     const { fees, setFees, isPanelOpen, setIsPanelOpen } = props;
+
+    const renderFee = ({ key, label }: FeeField) => (
+        <Field key={key} label={label}>
+            <NumberInput
+                value={fees[key]}
+                onChange={(value) => setFees({ ...fees, [key]: value })}
+                groupDigits
+                contentBefore="€"
+            />
+        </Field>
+    );
 
     return (
         <Drawer
@@ -67,140 +101,36 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                         />
                     }
                 >
-                    Mortgage Fees
+                    Fees
                 </DrawerHeaderTitle>
             </DrawerHeader>
 
             <DrawerBody>
                 <div className={styles.drawerContent}>
-                    <Text>
-                        These are the fees associated with taking out a mortgage
-                        on a property. They are estimates and can vary depending
-                        on the lender and the property.
+                    <Text className={styles.description}>
+                        Typical costs of buying with a mortgage. They're
+                        estimates and vary by lender and property.
                     </Text>
 
-                    <div className={styles.inputContainer}>
-                        <Label htmlFor="valuation-fee">Valuation Fee</Label>
-                        <Input
-                            id="valuation-fee"
-                            type="number"
-                            min={0}
-                            className={styles.input}
-                            value={fees.valuationFee?.toString() || ""}
-                            onChange={(_, data) =>
-                                setFees({
-                                    ...fees,
-                                    valuationFee: parseFloat(data.value) || 0,
-                                })
-                            }
-                            contentBefore="€"
-                        />
-                    </div>
-
-                    <div className={styles.inputContainer}>
-                        <Label htmlFor="survey-fee">Survey Fee</Label>
-                        <Input
-                            id="survey-fee"
-                            type="number"
-                            min={0}
-                            className={styles.input}
-                            value={fees.surveyFee?.toString() || ""}
-                            onChange={(_, data) =>
-                                setFees({
-                                    ...fees,
-                                    surveyFee: parseFloat(data.value) || 0,
-                                })
-                            }
-                            contentBefore="€"
-                        />
-                    </div>
+                    {purchaseFees.map(renderFee)}
 
                     <h2 className={styles.sectionHeader}>
-                        Legal Fees and Outlays
+                        Legal fees and outlays
                     </h2>
 
-                    <Text>
-                        An outlay is money spent by the solicitor on your behalf
-                        in the conveyancing process e.g. land registry fees.
-                        Your legal fees are your solicitor fees.
+                    <Text className={styles.description}>
+                        Legal fees are your solicitor's fees. Outlays are
+                        costs your solicitor pays on your behalf during
+                        conveyancing, such as Land Registry fees.
                     </Text>
 
-                    <div className={styles.inputContainer}>
-                        <Label htmlFor="legal-fee">Legal Fees</Label>
-                        <Input
-                            id="legal-fee"
-                            type="number"
-                            min={0}
-                            className={styles.input}
-                            value={fees.legalFee?.toString() || ""}
-                            onChange={(_, data) =>
-                                setFees({
-                                    ...fees,
-                                    legalFee: parseFloat(data.value) || 0,
-                                })
-                            }
-                            contentBefore="€"
-                        />
-                    </div>
+                    {legalFees.map(renderFee)}
 
-                    <div className={styles.inputContainer}>
-                        <Label htmlFor="search-fee">Law Searches Fee</Label>
-                        <Input
-                            id="search-fee"
-                            type="number"
-                            min={0}
-                            className={styles.input}
-                            value={fees.searchFee?.toString() || ""}
-                            onChange={(_, data) =>
-                                setFees({
-                                    ...fees,
-                                    searchFee: parseFloat(data.value) || 0,
-                                })
-                            }
-                            contentBefore="€"
-                        />
-                    </div>
-
-                    <div className={styles.inputContainer}>
-                        <Label htmlFor="register-deeds-fee">
-                            Register of Deeds Fee
-                        </Label>
-                        <Input
-                            id="register-deeds-fee"
-                            type="number"
-                            min={0}
-                            className={styles.input}
-                            value={fees.registerOfDeedsFee?.toString() || ""}
-                            onChange={(_, data) =>
-                                setFees({
-                                    ...fees,
-                                    registerOfDeedsFee:
-                                        parseFloat(data.value) || 0,
-                                })
-                            }
-                            contentBefore="€"
-                        />
-                    </div>
-
-                    <div className={styles.inputContainer}>
-                        <Label htmlFor="land-registry-fee">
-                            Land Registry Fee
-                        </Label>
-                        <Input
-                            id="land-registry-fee"
-                            type="number"
-                            min={0}
-                            className={styles.input}
-                            value={fees.landRegistryFee?.toString() || ""}
-                            onChange={(_, data) =>
-                                setFees({
-                                    ...fees,
-                                    landRegistryFee:
-                                        parseFloat(data.value) || 0,
-                                })
-                            }
-                            contentBefore="€"
-                        />
+                    <div className={styles.total}>
+                        <Text weight="semibold">Total</Text>
+                        <Text weight="semibold">
+                            {formatter.format(totalFees(fees))}
+                        </Text>
                     </div>
                 </div>
             </DrawerBody>
@@ -210,7 +140,10 @@ export const FeesPanel: React.FC<FeesPanelProps> = (props: FeesPanelProps) => {
                     appearance="primary"
                     onClick={() => setIsPanelOpen(false)}
                 >
-                    Close
+                    Done
+                </Button>
+                <Button onClick={() => setFees(defaultFees)}>
+                    Reset to defaults
                 </Button>
             </DrawerFooter>
         </Drawer>

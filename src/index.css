@@ -1,18 +1,5 @@
 :root {
-    font-family:
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-    line-height: 1.5;
-    font-weight: 400;
-    font-size: 18px;
-
-    color-scheme: dark;
-    color: rgba(241, 245, 249, 0.98);
-    background-color: #020617;
-
+    color-scheme: light dark;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -22,35 +9,4 @@
 body {
     margin: 0;
     min-width: 320px;
-    /* height: 100vh; */
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-    padding: 24px;
-    box-sizing: border-box;
-    /* background: radial-gradient(
-            circle at top left,
-            rgba(56, 189, 248, 0.18),
-            transparent 55%
-        ),
-        radial-gradient(
-            circle at bottom right,
-            rgba(34, 197, 94, 0.22),
-            transparent 55%
-        ),
-        #020617; */
-}
-
-#root {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-    height: 100%;
-}
-
-@media (max-width: 768px) {
-    body {
-        padding: 12px;
-    }
 }

@@ -1,44 +1,23 @@
-import { Input, Label, makeStyles } from "@fluentui/react-components";
+import { Field } from "@fluentui/react-components";
 import React from "react";
+import { NumberInput } from "../NumberInput/NumberInput";
 
 export interface TermInputProps {
     term: number;
     setTerm: (newValue: number) => void;
 }
 
-const useStyles = makeStyles({
-    container: {
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
-        alignItems: "center",
-    },
-    input: {
-        width: "220px",
-        maxWidth: "100%",
-    },
-});
-
 export const TermInput: React.FC<TermInputProps> = (props: TermInputProps) => {
-    const styles = useStyles();
-
     return (
-        <div className={styles.container}>
-            <Label htmlFor="term-input">Mortgage Term</Label>
-            <Input
-                id="term-input"
-                type="number"
+        <Field label="Term">
+            <NumberInput
+                value={props.term}
+                onChange={props.setTerm}
+                decimals={0}
                 min={1}
-                className={styles.input}
-                value={props.term.toString()}
-                onChange={(_e, data) => {
-                    const newValue = data.value;
-                    if (newValue && !isNaN(parseFloat(newValue))) {
-                        props.setTerm(parseFloat(newValue));
-                    }
-                }}
+                max={40}
                 contentAfter="years"
             />
-        </div>
+        </Field>
     );
 };

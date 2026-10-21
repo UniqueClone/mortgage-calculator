@@ -1,294 +1,246 @@
 import {
+    Badge,
     Button,
-    Divider,
-    Input,
-    Label,
+    Checkbox,
+    Field,
     Text,
-    Tooltip,
     makeStyles,
     tokens,
 } from "@fluentui/react-components";
-import { InfoRegular } from "@fluentui/react-icons";
-import React, { useEffect } from "react";
-import {
-    MortgageFees,
-    formatter,
-    getMonthlyPayment,
-    savingsRequired,
-    setLoanAmountToMax,
-} from "./MortgageDetails.mapper";
+import React from "react";
+import { OptionResult, formatter } from "./MortgageDetails.mapper";
+import { MortgageOptionState, MortgageSettings } from "../../storage";
+import { NumberInput } from "../NumberInput/NumberInput";
 
 export interface MortgageDetailsProps {
-    id: number;
-    fees: MortgageFees;
-    firstTimeBuyer: boolean;
-    interestRate: number | undefined;
-    maxLoan: number;
-    term: number;
+    option: MortgageOptionState;
+    onChange: (changes: Partial<MortgageOptionState>) => void;
+    settings: MortgageSettings;
+    result: OptionResult;
+    lowestMonthly?: boolean;
+    lowestSavings?: boolean;
 }
 
 const useStyles = makeStyles({
     container: {
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        padding: tokens.spacingVerticalL,
-        minWidth: "300px",
+        gap: tokens.spacingVerticalL,
+        flexGrow: 1,
     },
-    inputContainer: {
-        padding: tokens.spacingVerticalM,
+    inputs: {
         display: "flex",
         flexDirection: "column",
-        gap: tokens.spacingVerticalS,
-        alignItems: "center",
-        width: "100%",
+        gap: tokens.spacingVerticalM,
     },
-    input: {
-        width: "220px",
-        maxWidth: "100%",
+    maxButton: {
+        alignSelf: "flex-start",
     },
-    buttonContainer: {
-        paddingTop: tokens.spacingVerticalM,
-        paddingLeft: "26px",
+    newBuild: {
+        display: "flex",
+        flexDirection: "column",
+    },
+    checkbox: {
+        marginLeft: `calc(-1 * ${tokens.spacingHorizontalS})`,
+    },
+    note: {
+        color: tokens.colorNeutralForeground3,
+    },
+    // Results sit in a lightly tinted panel along the bottom of the card, so
+    // they read as outputs rather than more inputs.
+    results: {
+        marginTop: "auto",
+        marginInline: `calc(-1 * ${tokens.spacingHorizontalL})`,
+        marginBottom: `calc(-1 * ${tokens.spacingHorizontalL})`,
+        padding: tokens.spacingHorizontalL,
+        borderTop: `1px solid ${tokens.colorNeutralStroke2}`,
+        borderBottomLeftRadius: tokens.borderRadiusLarge,
+        borderBottomRightRadius: tokens.borderRadiusLarge,
+        backgroundColor: tokens.colorBrandBackground2,
+        display: "flex",
+        flexDirection: "column",
+        gap: tokens.spacingVerticalM,
+    },
+    result: {
+        display: "flex",
+        flexDirection: "column",
+    },
+    resultLabelRow: {
         display: "flex",
         alignItems: "center",
+        gap: tokens.spacingHorizontalS,
     },
-    savingsContainer: {
-        display: "flex",
-        alignItems: "center",
-        paddingLeft: tokens.spacingHorizontalXXL,
+    resultLabel: {
+        color: tokens.colorNeutralForeground3,
     },
-    monthlyPaymentContainer: {
-        display: "flex",
-        alignItems: "center",
+    figure: {
+        fontVariantNumeric: "tabular-nums",
     },
-    highlightText: {
+    primaryFigure: {
+        fontVariantNumeric: "tabular-nums",
         color: tokens.colorBrandForeground1,
     },
-    tooltipContent: {
-        display: "flex",
-        flexDirection: "column",
-        gap: tokens.spacingVerticalS,
-        alignItems: "flex-end",
+    breakdown: {
+        margin: `${tokens.spacingVerticalXS} 0 0`,
+        display: "grid",
+        gridTemplateColumns: "1fr auto",
+        rowGap: tokens.spacingVerticalXXS,
+        columnGap: tokens.spacingHorizontalM,
+        fontSize: tokens.fontSizeBase200,
+        lineHeight: tokens.lineHeightBase200,
+        color: tokens.colorNeutralForeground3,
+        "& dd": {
+            margin: 0,
+            textAlign: "right",
+            fontVariantNumeric: "tabular-nums",
+        },
     },
 });
 
 export const MortgageDetails: React.FC<MortgageDetailsProps> = (
-    props: MortgageDetailsProps
+    props: MortgageDetailsProps,
 ) => {
     const styles = useStyles();
-    const { id, fees, firstTimeBuyer, interestRate, maxLoan, term } = props;
-
-    const [deposit, setDeposit] = React.useState<number>(0);
-
-    const updateDeposit = (newValue: number) => {
-        if (newValue < 0) {
-            setDeposit(0);
-        } else {
-            setDeposit(newValue);
-        }
-    };
-
-    const localStorageData = localStorage.getItem("mortgageOption" + id);
-
-    const [localInterestRate, setLocalInterestRate] = React.useState<number>(
-        localStorageData
-            ? JSON.parse(localStorageData).interestRate
-            : interestRate ?? 4.0
-    );
-
-    const [houseValue, setHouseValue] = React.useState<number>(
-        localStorageData ? JSON.parse(localStorageData).houseValue : 0
-    );
-
-    const [loanAmount, setLoanAmount] = React.useState<number>(
-        localStorageData ? JSON.parse(localStorageData).loanAmount : 0
-    );
-
-    const handleHouseValueChange = (newValue: string) => {
-        if (newValue === "") {
-            setHouseValue(0);
-            return;
-        } else if (isNaN(parseFloat(newValue))) {
-            return;
-        } else {
-            setHouseValue(parseFloat(newValue));
-        }
-    };
-
-    const handleLoanAmountChange = (newValue: string) => {
-        if (newValue === "") {
-            setLoanAmount(0);
-            return;
-        } else if (isNaN(parseFloat(newValue))) {
-            return;
-        } else if (parseFloat(newValue) > maxLoan && maxLoan > 0) {
-            setLoanAmount(maxLoan);
-            return;
-        } else if (parseFloat(newValue) < 0) {
-            setLoanAmount(0);
-            return;
-        } else {
-            setLoanAmount(parseFloat(newValue));
-        }
-    };
-
-    useEffect(() => {
-        localStorage.setItem(
-            "mortgageOption" + id,
-            JSON.stringify({ houseValue, loanAmount, localInterestRate })
-        );
-    }, [houseValue, loanAmount, localInterestRate, id]);
-
-    useEffect(() => {
-        updateDeposit(houseValue - loanAmount);
-    }, [houseValue, loanAmount]);
+    const { option, onChange, settings, result, lowestMonthly, lowestSavings } =
+        props;
+    const { housePrice, loanAmount } = option;
+    const { loanWarning, savings } = result;
 
     return (
         <div className={styles.container}>
-            <div className={styles.inputContainer}>
-                <Label htmlFor={`house-price-${id}`}>House Price</Label>
-                <Input
-                    id={`house-price-${id}`}
-                    type="number"
-                    min={0}
-                    className={styles.input}
-                    value={houseValue.toString()}
-                    onChange={(_e, data) => handleHouseValueChange(data.value)}
-                    contentBefore="€"
-                />
-            </div>
-
-            {interestRate === undefined && (
-                <div className={styles.inputContainer}>
-                    <Label htmlFor={`interest-rate-${id}`}>Interest Rate</Label>
-                    <Input
-                        id={`interest-rate-${id}`}
-                        type="number"
-                        min={0}
-                        max={100}
-                        className={styles.input}
-                        value={localInterestRate?.toString() || ""}
-                        onChange={(_e, data) => {
-                            const value = data.value;
-                            setLocalInterestRate(
-                                value === "" ? 0 : parseFloat(value)
-                            );
-                        }}
-                        contentAfter="%"
+            <div className={styles.inputs}>
+                <Field label="House price">
+                    <NumberInput
+                        value={housePrice}
+                        onChange={(value) => onChange({ housePrice: value })}
+                        groupDigits
+                        zeroAsEmpty
+                        contentBefore="€"
                     />
-                </div>
-            )}
+                </Field>
 
-            <div className={styles.inputContainer}>
-                <Label htmlFor={`loan-amount-${id}`}>Loan Amount</Label>
-                <Input
-                    id={`loan-amount-${id}`}
-                    type="number"
-                    min={0}
-                    className={styles.input}
-                    value={loanAmount.toString()}
-                    onChange={(_e, data) => handleLoanAmountChange(data.value)}
-                    contentBefore="€"
-                />
-            </div>
+                {!settings.useGlobalInterestRate && (
+                    <Field label="Interest rate">
+                        <NumberInput
+                            value={option.interestRate}
+                            onChange={(value) =>
+                                onChange({ interestRate: value })
+                            }
+                            min={0}
+                            max={100}
+                            contentAfter="%"
+                        />
+                    </Field>
+                )}
 
-            <Text size={400} weight="semibold">
-                OR
-            </Text>
+                <Field
+                    label="Loan amount"
+                    validationState={loanWarning ? "warning" : "none"}
+                    validationMessage={loanWarning}
+                >
+                    <NumberInput
+                        value={loanAmount}
+                        onChange={(value) => onChange({ loanAmount: value })}
+                        groupDigits
+                        zeroAsEmpty
+                        contentBefore="€"
+                    />
+                </Field>
 
-            <div className={styles.buttonContainer}>
                 <Button
-                    appearance="primary"
-                    onClick={() =>
-                        setLoanAmountToMax(
-                            firstTimeBuyer,
-                            houseValue,
-                            maxLoan,
-                            setLoanAmount
-                        )
-                    }
+                    className={styles.maxButton}
+                    size="small"
+                    onClick={() => onChange({ loanAmount: result.maxLoan })}
                 >
                     Set loan to max
                 </Button>
-                <Tooltip
-                    content="This is 90% of the house value for a first time buyer (80% otherwise), unless you have set a maximum loan amount above that is less than 90% (or 80%) of the house value. In that case, the maximum loan amount will be used."
-                    relationship="description"
-                >
-                    <Button
-                        appearance="transparent"
-                        icon={<InfoRegular className={styles.highlightText} />}
-                        aria-label="More information about setting loan to max"
+
+                <div className={styles.newBuild}>
+                    <Checkbox
+                        className={styles.checkbox}
+                        label="New build"
+                        checked={option.newBuild}
+                        onChange={(_e, data) =>
+                            onChange({ newBuild: data.checked === true })
+                        }
                     />
-                </Tooltip>
+                    {option.newBuild && settings.firstTimeBuyer && (
+                        <Text size={200} className={styles.note}>
+                            {result.helpToBuy.ineligibleReason
+                                ? `No Help to Buy: ${result.helpToBuy.ineligibleReason}`
+                                : "Includes Help to Buy, which is also limited by the income tax you've paid in the last 4 years."}
+                        </Text>
+                    )}
+                </div>
             </div>
 
-            <Divider
-                style={{
-                    marginTop: tokens.spacingVerticalXL,
-                }}
-            />
+            <div className={styles.results}>
+                <div className={styles.result}>
+                    <div className={styles.resultLabelRow}>
+                        <Text size={200} className={styles.resultLabel}>
+                            Monthly payment
+                        </Text>
+                        {lowestMonthly && <LowestBadge />}
+                    </div>
+                    <Text
+                        size={600}
+                        weight="semibold"
+                        className={styles.primaryFigure}
+                    >
+                        {formatter.format(result.monthlyPayment)}
+                    </Text>
+                    <dl className={styles.breakdown}>
+                        {result.paymentsAfterRateRise.map(
+                            ({ rise, monthlyPayment }) => (
+                                <React.Fragment key={rise}>
+                                    <dt>If rates rise {rise}%</dt>
+                                    <dd>{formatter.format(monthlyPayment)}</dd>
+                                </React.Fragment>
+                            ),
+                        )}
+                        <dt>Total interest</dt>
+                        <dd>{formatter.format(result.totalInterest)}</dd>
+                        <dt>Total repaid</dt>
+                        <dd>{formatter.format(result.totalRepaid)}</dd>
+                    </dl>
+                </div>
 
-            <Text size={400} as="h3">
-                Savings Required
-            </Text>
-
-            <div className={styles.savingsContainer}>
-                <Text
-                    size={400}
-                    className={styles.highlightText}
-                    role="status"
-                    aria-live="polite"
-                >
-                    {formatter.format(
-                        savingsRequired(houseValue, deposit, fees)
-                    )}
-                </Text>
-
-                <Tooltip
-                    content={
-                        <div className={styles.tooltipContent}>
-                            <Text>Deposit: {formatter.format(deposit)}</Text>
-                            <Text>
-                                Fees:{" "}
-                                {formatter.format(savingsRequired(0, 0, fees))}
-                            </Text>
-                            <Text>
-                                Stamp Duty:{" "}
-                                {formatter.format(houseValue * 0.01)}
-                            </Text>
-                        </div>
-                    }
-                    relationship="description"
-                >
-                    <Button
-                        appearance="transparent"
-                        icon={<InfoRegular className={styles.highlightText} />}
-                        aria-label="More information about savings required breakdown"
-                    />
-                </Tooltip>
-            </div>
-
-            <Text size={400} as="h3">
-                Monthly Payment
-            </Text>
-
-            <div className={styles.monthlyPaymentContainer}>
-                <Text
-                    size={400}
-                    className={styles.highlightText}
-                    role="status"
-                    aria-live="polite"
-                >
-                    {formatter.format(
-                        getMonthlyPayment(
-                            loanAmount,
-                            interestRate ?? localInterestRate,
-                            term
-                        )
-                    )}
-                </Text>
+                <div className={styles.result}>
+                    <div className={styles.resultLabelRow}>
+                        <Text size={200} className={styles.resultLabel}>
+                            Savings needed
+                        </Text>
+                        {lowestSavings && <LowestBadge />}
+                    </div>
+                    <Text
+                        size={400}
+                        weight="semibold"
+                        className={styles.figure}
+                    >
+                        {formatter.format(savings.total)}
+                    </Text>
+                    <dl className={styles.breakdown}>
+                        <dt>Deposit</dt>
+                        <dd>{formatter.format(savings.deposit)}</dd>
+                        {savings.helpToBuy > 0 && (
+                            <>
+                                <dt>Help to Buy</dt>
+                                <dd>−{formatter.format(savings.helpToBuy)}</dd>
+                            </>
+                        )}
+                        <dt>Fees</dt>
+                        <dd>{formatter.format(savings.fees)}</dd>
+                        <dt>Stamp duty</dt>
+                        <dd>{formatter.format(savings.stampDuty)}</dd>
+                    </dl>
+                </div>
             </div>
         </div>
     );
 };
+
+const LowestBadge: React.FC = () => (
+    <Badge appearance="tint" color="brand" size="small">
+        Lowest
+    </Badge>
+);
