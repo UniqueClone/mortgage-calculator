@@ -179,8 +179,6 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                         size={600}
                         weight="semibold"
                         className={styles.primaryFigure}
-                        role="status"
-                        aria-live="polite"
                     >
                         {formatter.format(result.monthlyPayment)}
                     </Text>
@@ -211,8 +209,6 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                         size={400}
                         weight="semibold"
                         className={styles.figure}
-                        role="status"
-                        aria-live="polite"
                     >
                         {formatter.format(savings.total)}
                     </Text>

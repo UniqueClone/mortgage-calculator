@@ -16,10 +16,12 @@ import { MortgageDetails } from "../MortgageDetails/MortgageDetails";
 import {
     OptionResult,
     calculateOption,
+    formatter,
     loanToIncomeLimit,
     lowestPositive,
 } from "../MortgageDetails/MortgageDetails.mapper";
 import { NumberInput } from "../NumberInput/NumberInput";
+import { useSettledAnnouncement } from "../../hooks/useSettledAnnouncement";
 import { FeesPanel } from "../FeesPanel/FeesPanel";
 import {
     MortgageOptionState,
@@ -362,6 +364,15 @@ const useMortgageOptionStyles = makeStyles({
         border: `1px solid ${tokens.colorNeutralStroke2}`,
         backgroundColor: tokens.colorNeutralBackground1,
     },
+    visuallyHidden: {
+        position: "absolute",
+        width: "1px",
+        height: "1px",
+        margin: "-1px",
+        overflow: "hidden",
+        clip: "rect(0 0 0 0)",
+        whiteSpace: "nowrap",
+    },
     optionHeader: {
         display: "flex",
         alignItems: "center",
@@ -380,6 +391,13 @@ const MortgageOption: React.FC<MortgageOptionProps> = (
 ) => {
     const styles = useMortgageOptionStyles();
     const { title, option, onChange, onRemove, ...detailsProps } = props;
+    const { result } = detailsProps;
+
+    const announcement = useSettledAnnouncement(
+        `${title}: monthly payment ${formatter.format(
+            result.monthlyPayment,
+        )}, savings needed ${formatter.format(result.savings.total)}.`,
+    );
 
     return (
         <div
@@ -407,6 +425,10 @@ const MortgageOption: React.FC<MortgageOptionProps> = (
                 onChange={onChange}
                 {...detailsProps}
             />
+
+            <div className={styles.visuallyHidden} aria-live="polite">
+                {announcement}
+            </div>
         </div>
     );
 };
