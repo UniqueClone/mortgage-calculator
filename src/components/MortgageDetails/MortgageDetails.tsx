@@ -1,14 +1,11 @@
 import {
     Button,
-    Divider,
+    Field,
     Input,
-    Label,
     Text,
-    Tooltip,
     makeStyles,
     tokens,
 } from "@fluentui/react-components";
-import { InfoRegular } from "@fluentui/react-icons";
 import React, { useEffect } from "react";
 import {
     MortgageFees,
@@ -31,45 +28,53 @@ const useStyles = makeStyles({
     container: {
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        padding: tokens.spacingVerticalL,
-        minWidth: "300px",
+        gap: tokens.spacingVerticalL,
+        flexGrow: 1,
     },
-    inputContainer: {
-        padding: tokens.spacingVerticalM,
+    inputs: {
         display: "flex",
         flexDirection: "column",
-        gap: tokens.spacingVerticalS,
-        alignItems: "center",
-        width: "100%",
+        gap: tokens.spacingVerticalM,
     },
-    input: {
-        width: "220px",
-        maxWidth: "100%",
+    maxButton: {
+        alignSelf: "flex-start",
     },
-    buttonContainer: {
-        paddingTop: tokens.spacingVerticalM,
-        paddingLeft: "26px",
+    results: {
+        marginTop: "auto",
+        paddingTop: tokens.spacingVerticalL,
+        borderTop: `1px solid ${tokens.colorNeutralStroke2}`,
         display: "flex",
-        alignItems: "center",
+        flexDirection: "column",
+        gap: tokens.spacingVerticalM,
     },
-    savingsContainer: {
+    result: {
         display: "flex",
-        alignItems: "center",
-        paddingLeft: tokens.spacingHorizontalXXL,
+        flexDirection: "column",
     },
-    monthlyPaymentContainer: {
-        display: "flex",
-        alignItems: "center",
+    resultLabel: {
+        color: tokens.colorNeutralForeground3,
     },
-    highlightText: {
+    figure: {
+        fontVariantNumeric: "tabular-nums",
+    },
+    primaryFigure: {
+        fontVariantNumeric: "tabular-nums",
         color: tokens.colorBrandForeground1,
     },
-    tooltipContent: {
-        display: "flex",
-        flexDirection: "column",
-        gap: tokens.spacingVerticalS,
-        alignItems: "flex-end",
+    breakdown: {
+        margin: `${tokens.spacingVerticalXS} 0 0`,
+        display: "grid",
+        gridTemplateColumns: "1fr auto",
+        rowGap: tokens.spacingVerticalXXS,
+        columnGap: tokens.spacingHorizontalM,
+        fontSize: tokens.fontSizeBase200,
+        lineHeight: tokens.lineHeightBase200,
+        color: tokens.colorNeutralForeground3,
+        "& dd": {
+            margin: 0,
+            textAlign: "right",
+            fontVariantNumeric: "tabular-nums",
+        },
     },
 });
 
@@ -146,60 +151,53 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
 
     return (
         <div className={styles.container}>
-            <div className={styles.inputContainer}>
-                <Label htmlFor={`house-price-${id}`}>House Price</Label>
-                <Input
-                    id={`house-price-${id}`}
-                    type="number"
-                    min={0}
-                    className={styles.input}
-                    value={houseValue.toString()}
-                    onChange={(_e, data) => handleHouseValueChange(data.value)}
-                    contentBefore="€"
-                />
-            </div>
-
-            {interestRate === undefined && (
-                <div className={styles.inputContainer}>
-                    <Label htmlFor={`interest-rate-${id}`}>Interest Rate</Label>
+            <div className={styles.inputs}>
+                <Field label="House price">
                     <Input
-                        id={`interest-rate-${id}`}
                         type="number"
                         min={0}
-                        max={100}
-                        className={styles.input}
-                        value={localInterestRate?.toString() || ""}
-                        onChange={(_e, data) => {
-                            const value = data.value;
-                            setLocalInterestRate(
-                                value === "" ? 0 : parseFloat(value)
-                            );
-                        }}
-                        contentAfter="%"
+                        value={houseValue.toString()}
+                        onChange={(_e, data) =>
+                            handleHouseValueChange(data.value)
+                        }
+                        contentBefore="€"
                     />
-                </div>
-            )}
+                </Field>
 
-            <div className={styles.inputContainer}>
-                <Label htmlFor={`loan-amount-${id}`}>Loan Amount</Label>
-                <Input
-                    id={`loan-amount-${id}`}
-                    type="number"
-                    min={0}
-                    className={styles.input}
-                    value={loanAmount.toString()}
-                    onChange={(_e, data) => handleLoanAmountChange(data.value)}
-                    contentBefore="€"
-                />
-            </div>
+                {interestRate === undefined && (
+                    <Field label="Interest rate">
+                        <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            step={0.05}
+                            value={localInterestRate?.toString() || ""}
+                            onChange={(_e, data) => {
+                                const value = data.value;
+                                setLocalInterestRate(
+                                    value === "" ? 0 : parseFloat(value)
+                                );
+                            }}
+                            contentAfter="%"
+                        />
+                    </Field>
+                )}
 
-            <Text size={400} weight="semibold">
-                OR
-            </Text>
+                <Field label="Loan amount">
+                    <Input
+                        type="number"
+                        min={0}
+                        value={loanAmount.toString()}
+                        onChange={(_e, data) =>
+                            handleLoanAmountChange(data.value)
+                        }
+                        contentBefore="€"
+                    />
+                </Field>
 
-            <div className={styles.buttonContainer}>
                 <Button
-                    appearance="primary"
+                    className={styles.maxButton}
+                    size="small"
                     onClick={() =>
                         setLoanAmountToMax(
                             firstTimeBuyer,
@@ -211,83 +209,54 @@ export const MortgageDetails: React.FC<MortgageDetailsProps> = (
                 >
                     Set loan to max
                 </Button>
-                <Tooltip
-                    content="This is 90% of the house value for a first time buyer (80% otherwise), unless you have set a maximum loan amount above that is less than 90% (or 80%) of the house value. In that case, the maximum loan amount will be used."
-                    relationship="description"
-                >
-                    <Button
-                        appearance="transparent"
-                        icon={<InfoRegular className={styles.highlightText} />}
-                        aria-label="More information about setting loan to max"
-                    />
-                </Tooltip>
             </div>
 
-            <Divider
-                style={{
-                    marginTop: tokens.spacingVerticalXL,
-                }}
-            />
+            <div className={styles.results}>
+                <div className={styles.result}>
+                    <Text size={200} className={styles.resultLabel}>
+                        Monthly payment
+                    </Text>
+                    <Text
+                        size={600}
+                        weight="semibold"
+                        className={styles.primaryFigure}
+                        role="status"
+                        aria-live="polite"
+                    >
+                        {formatter.format(
+                            getMonthlyPayment(
+                                loanAmount,
+                                interestRate ?? localInterestRate,
+                                term
+                            )
+                        )}
+                    </Text>
+                </div>
 
-            <Text size={400} as="h3">
-                Savings Required
-            </Text>
-
-            <div className={styles.savingsContainer}>
-                <Text
-                    size={400}
-                    className={styles.highlightText}
-                    role="status"
-                    aria-live="polite"
-                >
-                    {formatter.format(
-                        savingsRequired(houseValue, deposit, fees)
-                    )}
-                </Text>
-
-                <Tooltip
-                    content={
-                        <div className={styles.tooltipContent}>
-                            <Text>Deposit: {formatter.format(deposit)}</Text>
-                            <Text>
-                                Fees:{" "}
-                                {formatter.format(savingsRequired(0, 0, fees))}
-                            </Text>
-                            <Text>
-                                Stamp Duty:{" "}
-                                {formatter.format(houseValue * 0.01)}
-                            </Text>
-                        </div>
-                    }
-                    relationship="description"
-                >
-                    <Button
-                        appearance="transparent"
-                        icon={<InfoRegular className={styles.highlightText} />}
-                        aria-label="More information about savings required breakdown"
-                    />
-                </Tooltip>
-            </div>
-
-            <Text size={400} as="h3">
-                Monthly Payment
-            </Text>
-
-            <div className={styles.monthlyPaymentContainer}>
-                <Text
-                    size={400}
-                    className={styles.highlightText}
-                    role="status"
-                    aria-live="polite"
-                >
-                    {formatter.format(
-                        getMonthlyPayment(
-                            loanAmount,
-                            interestRate ?? localInterestRate,
-                            term
-                        )
-                    )}
-                </Text>
+                <div className={styles.result}>
+                    <Text size={200} className={styles.resultLabel}>
+                        Savings needed
+                    </Text>
+                    <Text
+                        size={400}
+                        weight="semibold"
+                        className={styles.figure}
+                        role="status"
+                        aria-live="polite"
+                    >
+                        {formatter.format(
+                            savingsRequired(houseValue, deposit, fees)
+                        )}
+                    </Text>
+                    <dl className={styles.breakdown}>
+                        <dt>Deposit</dt>
+                        <dd>{formatter.format(deposit)}</dd>
+                        <dt>Fees</dt>
+                        <dd>{formatter.format(savingsRequired(0, 0, fees))}</dd>
+                        <dt>Stamp duty</dt>
+                        <dd>{formatter.format(houseValue * 0.01)}</dd>
+                    </dl>
+                </div>
             </div>
         </div>
     );

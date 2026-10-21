@@ -1,11 +1,4 @@
-import {
-    Input,
-    Label,
-    Tooltip,
-    Button,
-    makeStyles,
-} from "@fluentui/react-components";
-import { InfoRegular } from "@fluentui/react-icons";
+import { Field, Input } from "@fluentui/react-components";
 import React from "react";
 
 export interface MaxLoanInputProps {
@@ -13,59 +6,19 @@ export interface MaxLoanInputProps {
     setMaxLoan: (newValue: number) => void;
 }
 
-const useStyles = makeStyles({
-    container: {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-    },
-    labelContainer: {
-        display: "flex",
-        alignItems: "center",
-    },
-    input: {
-        width: "220px",
-        maxWidth: "100%",
-    },
-    infoIcon: {
-        color: "rgb(33, 171, 56)",
-        cursor: "pointer",
-    },
-    tooltipButton: {
-        height: "auto",
-        border: "none",
-        backgroundColor: "transparent",
-    },
-});
-
 export const MaxLoanInput: React.FC<MaxLoanInputProps> = (
     props: MaxLoanInputProps
 ) => {
-    const styles = useStyles();
     const { maxLoan, setMaxLoan } = props;
 
     return (
-        <div className={styles.container}>
-            <div className={styles.labelContainer}>
-                <Label htmlFor="max-loan-input">Max Loan</Label>
-
-                <Tooltip
-                    content="If you have your mortgage approval, you can put the max loan amount here. Note: This is not the house value, it is the house value minus your deposit."
-                    relationship="description"
-                >
-                    <Button
-                        appearance="transparent"
-                        className={styles.tooltipButton}
-                        icon={<InfoRegular className={styles.infoIcon} />}
-                        aria-label="More information about max loan amount"
-                    />
-                </Tooltip>
-            </div>
+        <Field
+            label="Max loan"
+            hint="From your approval in principle. Leave at 0 for no limit."
+        >
             <Input
-                id="max-loan-input"
                 type="number"
                 min={0}
-                className={styles.input}
                 value={maxLoan.toString()}
                 onChange={(_e, data) => {
                     const newValue = data.value;
@@ -81,6 +34,6 @@ export const MaxLoanInput: React.FC<MaxLoanInputProps> = (
                 }}
                 contentBefore="€"
             />
-        </div>
+        </Field>
     );
 };

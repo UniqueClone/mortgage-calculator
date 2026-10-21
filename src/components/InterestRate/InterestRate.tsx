@@ -1,5 +1,11 @@
 import React from "react";
-import { Checkbox, Input, Label, makeStyles } from "@fluentui/react-components";
+import {
+    Checkbox,
+    Field,
+    Input,
+    makeStyles,
+    tokens,
+} from "@fluentui/react-components";
 
 export interface InterestRateProps {
     interestRate: number | undefined;
@@ -12,18 +18,10 @@ const useStyles = makeStyles({
     container: {
         display: "flex",
         flexDirection: "column",
-        gap: "16px",
-        alignItems: "center",
+        gap: tokens.spacingVerticalXS,
     },
-    inputContainer: {
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
-        alignItems: "center",
-    },
-    input: {
-        width: "220px",
-        maxWidth: "100%",
+    checkbox: {
+        marginLeft: `calc(-1 * ${tokens.spacingHorizontalS})`,
     },
 });
 
@@ -44,43 +42,52 @@ export const InterestRate: React.FC<InterestRateProps> = (
 
     return (
         <div className={styles.container}>
+            <Field
+                label="Interest rate"
+                hint={
+                    useGlobalInterestRate
+                        ? undefined
+                        : "Set separately for each option"
+                }
+            >
+                <Input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={0.05}
+                    disabled={!useGlobalInterestRate}
+                    value={
+                        useGlobalInterestRate
+                            ? interestRate?.toString() || ""
+                            : ""
+                    }
+                    onChange={(_e, data) => {
+                        const newValue = data.value;
+                        if (newValue === "") {
+                            setInterestRate(0);
+                        } else if (isNaN(parseFloat(newValue))) {
+                            return;
+                        } else if (
+                            parseFloat(newValue) <= 0 ||
+                            parseFloat(newValue) > 100
+                        ) {
+                            setInterestRate(0);
+                        } else {
+                            setInterestRate(parseFloat(newValue));
+                        }
+                    }}
+                    contentAfter="%"
+                />
+            </Field>
+
             <Checkbox
-                label="Use one interest rate?"
+                className={styles.checkbox}
+                label="Same rate for all options"
                 checked={useGlobalInterestRate}
                 onChange={(_e, data) => {
                     handleGlobalInterestRateChange(data.checked === true);
                 }}
             />
-
-            {useGlobalInterestRate && (
-                <div className={styles.inputContainer}>
-                    <Label htmlFor="interest-rate-input">Interest Rate</Label>
-                    <Input
-                        id="interest-rate-input"
-                        type="number"
-                        min={0}
-                        max={100}
-                        className={styles.input}
-                        value={interestRate?.toString() || ""}
-                        onChange={(_e, data) => {
-                            const newValue = data.value;
-                            if (newValue === "") {
-                                setInterestRate(0);
-                            } else if (isNaN(parseFloat(newValue))) {
-                                return;
-                            } else if (
-                                parseFloat(newValue) <= 0 ||
-                                parseFloat(newValue) > 100
-                            ) {
-                                setInterestRate(0);
-                            } else {
-                                setInterestRate(parseFloat(newValue));
-                            }
-                        }}
-                        contentAfter="%"
-                    />
-                </div>
-            )}
         </div>
     );
 };

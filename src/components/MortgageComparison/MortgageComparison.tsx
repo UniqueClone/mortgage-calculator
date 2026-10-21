@@ -5,9 +5,7 @@ import {
     Text,
     makeStyles,
     tokens,
-    Divider,
 } from "@fluentui/react-components";
-import { DrinkCoffeeRegular } from "@fluentui/react-icons";
 import React, { useEffect } from "react";
 import { InterestRate } from "../InterestRate/InterestRate";
 import { MaxLoanInput } from "../MaxLoanInput/MaxLoanInput";
@@ -19,22 +17,69 @@ import { FeesPanel } from "../FeesPanel/FeesPanel";
 export interface MortgageComparisonProps {}
 
 const useStyles = makeStyles({
-    container: {
+    page: {
+        maxWidth: "1080px",
+        margin: "0 auto",
+        padding: `${tokens.spacingVerticalXXXL} ${tokens.spacingHorizontalXL}`,
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
         gap: tokens.spacingVerticalXXL,
-        padding: tokens.spacingVerticalXL,
+        boxSizing: "border-box",
+        "@media (max-width: 600px)": {
+            padding: `${tokens.spacingVerticalXL} ${tokens.spacingHorizontalL}`,
+        },
+    },
+    header: {
+        display: "flex",
+        flexDirection: "column",
+        gap: tokens.spacingVerticalXS,
+    },
+    title: {
+        margin: 0,
+        fontSize: tokens.fontSizeHero700,
+        lineHeight: tokens.lineHeightHero700,
+        fontWeight: tokens.fontWeightSemibold,
+    },
+    subtitle: {
+        color: tokens.colorNeutralForeground3,
+    },
+    sectionHeading: {
+        margin: `0 0 ${tokens.spacingVerticalM}`,
+        fontSize: tokens.fontSizeBase400,
+        fontWeight: tokens.fontWeightSemibold,
+    },
+    settings: {
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+        gap: `${tokens.spacingVerticalL} ${tokens.spacingHorizontalXL}`,
+        alignItems: "start",
+    },
+    buyerAndFees: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        gap: tokens.spacingVerticalS,
+    },
+    checkbox: {
+        marginLeft: `calc(-1 * ${tokens.spacingHorizontalS})`,
+    },
+    hint: {
+        color: tokens.colorNeutralForeground3,
+        marginTop: `calc(-1 * ${tokens.spacingVerticalS})`,
     },
     comparisonContainer: {
-        display: "flex",
-        flexWrap: "wrap",
-        gap: tokens.spacingHorizontalXXXL,
-        justifyContent: "center",
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+        gap: tokens.spacingHorizontalL,
     },
-    disclaimer: {
-        width: "80%",
-        textAlign: "center",
+    footer: {
+        display: "flex",
+        flexDirection: "column",
+        gap: tokens.spacingVerticalS,
+        paddingTop: tokens.spacingVerticalL,
+        borderTop: `1px solid ${tokens.colorNeutralStroke2}`,
+        color: tokens.colorNeutralForeground3,
+        maxWidth: "70ch",
     },
 });
 
@@ -87,123 +132,97 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
     }, [fees, interestRate, useGlobalInterestRate, maxLoan, term]);
 
     return (
-        <div className={styles.container}>
-            <h1>Mortgage Comparison</h1>
+        <main className={styles.page}>
+            <header className={styles.header}>
+                <h1 className={styles.title}>Mortgage comparison</h1>
+                <Text className={styles.subtitle}>
+                    Compare monthly repayments and upfront costs for up to
+                    three Irish mortgage scenarios.
+                </Text>
+            </header>
 
-            <span
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                    alignItems: "center",
-                }}
-            >
-                <Checkbox
-                    label="First Time Buyer?"
-                    checked={firstTimeBuyer}
-                    onChange={(_e, data) => {
-                        setFirstTimeBuyer(data.checked === true);
-                    }}
-                    style={{
-                        padding: 0,
-                    }}
-                />
+            <section aria-labelledby="settings-heading">
+                <h2 id="settings-heading" className={styles.sectionHeading}>
+                    Your mortgage
+                </h2>
+                <div className={styles.settings}>
+                    <InterestRate
+                        interestRate={interestRate}
+                        setInterestRate={setInterestRate}
+                        useGlobalInterestRate={useGlobalInterestRate}
+                        setUseGlobalInterestRate={setUseGlobalInterestRate}
+                    />
 
-                <InterestRate
-                    interestRate={interestRate}
-                    setInterestRate={setInterestRate}
-                    useGlobalInterestRate={useGlobalInterestRate}
-                    setUseGlobalInterestRate={setUseGlobalInterestRate}
-                />
-            </span>
+                    <MaxLoanInput maxLoan={maxLoan} setMaxLoan={setMaxLoan} />
 
-            <MaxLoanInput maxLoan={maxLoan} setMaxLoan={setMaxLoan} />
+                    <TermInput term={term} setTerm={setTerm} />
 
-            <TermInput term={term} setTerm={setTerm} />
+                    <div className={styles.buyerAndFees}>
+                        <Checkbox
+                            className={styles.checkbox}
+                            label="First-time buyer"
+                            checked={firstTimeBuyer}
+                            onChange={(_e, data) => {
+                                setFirstTimeBuyer(data.checked === true);
+                            }}
+                        />
+                        <Text size={200} className={styles.hint}>
+                            Loans are capped at {firstTimeBuyer ? "90%" : "80%"}{" "}
+                            of the price, or your max loan if lower.
+                        </Text>
+                        <Button onClick={() => setIsPanelOpen(true)}>
+                            Edit fees
+                        </Button>
+                    </div>
+                </div>
+            </section>
 
-            <Button appearance="primary" onClick={() => setIsPanelOpen(true)}>
-                View/Edit Fees
-            </Button>
-
-            <Divider />
-
-            <div
-                className={styles.comparisonContainer}
-                role="list"
-                aria-label="Mortgage options"
-            >
-                <MortgageOption
-                    fees={fees}
-                    firstTimeBuyer={firstTimeBuyer}
-                    id={1}
-                    interestRate={interestRate}
-                    useGlobalInterestRate={useGlobalInterestRate}
-                    maxLoan={maxLoan}
-                    term={term}
-                />
-
-                <MortgageOption
-                    fees={fees}
-                    firstTimeBuyer={firstTimeBuyer}
-                    id={2}
-                    interestRate={interestRate}
-                    useGlobalInterestRate={useGlobalInterestRate}
-                    maxLoan={maxLoan}
-                    term={term}
-                />
-
-                <MortgageOption
-                    fees={fees}
-                    firstTimeBuyer={firstTimeBuyer}
-                    id={3}
-                    interestRate={interestRate}
-                    useGlobalInterestRate={useGlobalInterestRate}
-                    maxLoan={maxLoan}
-                    term={term}
-                />
-            </div>
-
-            <br />
-
-            <Text className={styles.disclaimer} size={400}>
-                <strong>Disclaimer:</strong> This is a simple mortgage
-                comparison tool that calculates monthly payments based on the
-                interest rate, loan amount, and term. The numbers are all
-                estimates based on my own experience and research. Always
-                consult with a financial advisor before making any decisions.
-            </Text>
-
-            <Text size={400}>
-                If you found this useful, consider{" "}
-                <Link
-                    href="https://www.buymeacoffee.com/ryanlynch"
-                    style={{ color: "rgb(33, 171, 56)" }}
-                    target="_blank"
+            <section aria-labelledby="options-heading">
+                <h2 id="options-heading" className={styles.sectionHeading}>
+                    Options
+                </h2>
+                <div
+                    className={styles.comparisonContainer}
+                    role="list"
+                    aria-label="Mortgage options"
                 >
-                    buying me a coffee! <DrinkCoffeeRegular />{" "}
-                </Link>
-            </Text>
+                    {[1, 2, 3].map((id) => (
+                        <MortgageOption
+                            key={id}
+                            fees={fees}
+                            firstTimeBuyer={firstTimeBuyer}
+                            id={id}
+                            interestRate={interestRate}
+                            useGlobalInterestRate={useGlobalInterestRate}
+                            maxLoan={maxLoan}
+                            term={term}
+                        />
+                    ))}
+                </div>
+            </section>
 
-            <Text size={400}>
-                If you have any feedback or suggestions, please{" "}
-                <Link
-                    href="mailto:ryanjetbox@gmail.com"
-                    style={{
-                        color: "rgb(33, 171, 56)",
-                    }}
-                >
-                    send me an email{" "}
-                </Link>
-                or{" "}
-                <Link
-                    href="https://github.com/UniqueClone/mortgage-calculator/issues/new"
-                    style={{
-                        color: "rgb(33, 171, 56)",
-                    }}
-                >
-                    open an issue on GitHub!
-                </Link>
-            </Text>
+            <footer className={styles.footer}>
+                <Text size={200}>
+                    These figures are estimates based on my own experience and
+                    research, not financial advice. Always talk to a mortgage
+                    adviser before making a decision.
+                </Text>
+                <Text size={200}>
+                    Found this useful?{" "}
+                    <Link
+                        href="https://www.buymeacoffee.com/ryanlynch"
+                        target="_blank"
+                    >
+                        Buy me a coffee
+                    </Link>
+                    . Feedback or ideas?{" "}
+                    <Link href="mailto:ryanjetbox@gmail.com">Email me</Link> or{" "}
+                    <Link href="https://github.com/UniqueClone/mortgage-calculator/issues/new">
+                        open an issue on GitHub
+                    </Link>
+                    .
+                </Text>
+            </footer>
 
             <FeesPanel
                 fees={fees}
@@ -211,7 +230,7 @@ export const MortgageComparison: React.FC<MortgageComparisonProps> = () => {
                 isPanelOpen={isPanelOpen}
                 setIsPanelOpen={setIsPanelOpen}
             />
-        </div>
+        </main>
     );
 };
 
@@ -229,15 +248,16 @@ const useMortgageOptionStyles = makeStyles({
     optionContainer: {
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        flexGrow: 1,
+        gap: tokens.spacingVerticalM,
+        padding: tokens.spacingHorizontalL,
         borderRadius: tokens.borderRadiusLarge,
-        padding: tokens.spacingVerticalL,
-        paddingInline: tokens.spacingHorizontalXL,
-        border: `1px solid ${tokens.colorBrandStroke1}`,
-        background: `radial-gradient(circle at top left, ${tokens.colorBrandBackground2}, transparent 60%), ${tokens.colorNeutralBackground2}`,
-        boxShadow: tokens.shadow16,
-        minWidth: "280px",
+        border: `1px solid ${tokens.colorNeutralStroke2}`,
+        backgroundColor: tokens.colorNeutralBackground1,
+    },
+    optionTitle: {
+        margin: 0,
+        fontSize: tokens.fontSizeBase400,
+        fontWeight: tokens.fontWeightSemibold,
     },
 });
 
@@ -261,9 +281,7 @@ const MortgageOption: React.FC<MortgageOptionProps> = (
             role="listitem"
             aria-label={`Mortgage option ${id}`}
         >
-            <Text as="h2" size={400} weight="semibold">
-                Option {id}
-            </Text>
+            <h3 className={styles.optionTitle}>Option {id}</h3>
 
             <MortgageDetails
                 id={id}
